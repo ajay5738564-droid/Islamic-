@@ -518,6 +518,15 @@ fun HomeScreen(
                 }
             }
         }
+
+        // Respectful Non-Intrusive Sponsored Community Notice Banner
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            com.example.ui.components.IslamicAdBannerCard(
+                screenContext = "home_bottom",
+                currentLanguage = currentLanguage
+            )
+        }
     }
 }
 

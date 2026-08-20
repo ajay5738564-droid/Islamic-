@@ -6,9 +6,10 @@ import com.example.data.repository.AppLanguage
 object AppStrings {
 
     fun appTitle(lang: AppLanguage) = when (lang) {
-        AppLanguage.URDU -> "دینوفا اسلامی گائیڈ"
-        AppLanguage.HINDI -> "दीनोवा इस्लामिक गाइड"
-        AppLanguage.ENGLISH, AppLanguage.ARABIC -> "Deenova Islamic Guide"
+        AppLanguage.URDU -> "اسلامک ایپ"
+        AppLanguage.HINDI -> "इस्लामिक ऐप"
+        AppLanguage.ENGLISH -> "Islamic App"
+        AppLanguage.ARABIC -> "التطبيق الإسلامي"
     }
 
     fun tabHome(lang: AppLanguage) = when (lang) {

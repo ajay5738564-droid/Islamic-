@@ -77,6 +77,7 @@ fun ExploreScreen(
         ExploreSubScreen.HAJJ_UMRAH_GUIDE -> HajjUmrahGuideView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.ZAKAT_CALCULATOR -> ZakatCalculatorView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.ISLAMIC_KNOWLEDGE -> IslamicKnowledgeView(viewModel = viewModel, modifier = modifier)
+        ExploreSubScreen.SOURCES -> SourcesScreen(onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, currentLanguage = viewModel.appLanguage.collectAsState().value, modifier = modifier)
     }
 }
 
@@ -259,7 +260,24 @@ fun ExploreMainMenu(
                     testTag = "explore_item_knowledge",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_KNOWLEDGE) }
                 )
+
+                ExploreFeatureCard(
+                    title = "مآخذ اور معتبر حوالہ جات (Sources & References)",
+                    subtitle = "قرآن کریم، احادیث، مسنون دعائیں اور فلکیاتی حسابات کے ماخذات",
+                    icon = Icons.Default.MenuBook,
+                    testTag = "explore_item_sources",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.SOURCES) }
+                )
             }
+        }
+
+        // Respectful Non-Intrusive Sponsored Community Notice Banner
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            com.example.ui.components.IslamicAdBannerCard(
+                screenContext = "explore_bottom",
+                currentLanguage = viewModel.appLanguage.collectAsState().value
+            )
         }
     }
 }

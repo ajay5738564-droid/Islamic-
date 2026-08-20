@@ -82,7 +82,8 @@ enum class ExploreSubScreen {
     RAMADAN_DASHBOARD,
     HAJJ_UMRAH_GUIDE,
     ZAKAT_CALCULATOR,
-    ISLAMIC_KNOWLEDGE
+    ISLAMIC_KNOWLEDGE,
+    SOURCES
 }
 
 enum class AudioPlaybackState {

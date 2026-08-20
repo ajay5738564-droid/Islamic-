@@ -92,14 +92,14 @@ fun DeenovaTopHeader(
 
                         Column {
                             Text(
-                                text = "Deenova",
+                                text = "Islamic App",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
-                                text = "دینوفا • All-in-One Islamic Guide",
+                                text = "اسلامک ایپ • All-in-One Islamic Guide",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = GoldLight
                             )

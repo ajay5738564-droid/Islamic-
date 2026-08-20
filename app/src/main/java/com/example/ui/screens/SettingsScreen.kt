@@ -268,7 +268,27 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "Saved Bookmarks",
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "زبان تبدیل کریں"
+                    AppLanguage.HINDI -> "भाषा बदलें"
+                    AppLanguage.ARABIC -> "تغيير اللغة"
+                    else -> "Application Language"
+                },
+                subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName})",
+                icon = Icons.Default.Language,
+                testTag = "setting_language_item",
+                onClick = onOpenLanguagePicker
+            )
+        }
+
+        item {
+            SettingsItemCard(
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "محفوظ شدہ بُک مارکس"
+                    AppLanguage.HINDI -> "सहेजे गए बुकमार्क"
+                    AppLanguage.ARABIC -> "العلامات المرجعية المحفوظة"
+                    else -> "Saved Bookmarks"
+                },
                 subtitle = "View saved Quran verses, Duas & Hadiths",
                 icon = Icons.Default.Bookmark,
                 testTag = "setting_bookmarks_item",
@@ -290,7 +310,20 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "About Deenova & Religious Accuracy",
+                title = "Sources & Verified References",
+                subtitle = "Tanzil, King Fahd Mushaf, Bukhari, Muslim, Hisnul Muslim",
+                icon = Icons.Default.MenuBook,
+                testTag = "setting_sources_item",
+                onClick = {
+                    viewModel.setTab(com.example.ui.NavigationTab.EXPLORE)
+                    viewModel.setExploreSubScreen(com.example.ui.ExploreSubScreen.SOURCES)
+                }
+            )
+        }
+
+        item {
+            SettingsItemCard(
+                title = "About Islamic App & Authenticity",
                 subtitle = "Verified Islamic sources, offline-first privacy & credits",
                 icon = Icons.Default.Info,
                 testTag = "setting_about_item",
@@ -364,20 +397,21 @@ fun SettingsScreen(
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
-            title = { Text("Deenova • دينوفا (v1.0)") },
+            title = { Text("Islamic App • التطبيق الإسلامي (v1.0)") },
             text = {
                 Column(modifier = Modifier.heightIn(max = 380.dp)) {
                     Text(
-                        text = "Authentic All-in-One Islamic Guide",
+                        text = "Authentic All-in-One Islamic Companion",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Deenova is designed to serve Muslims globally with accurate prayer calculations, authentic Quranic verses, graded Hadiths, and verified daily supplications (Hisn al-Muslim).\n\n" +
-                                "• Religious Texts: Authentic Uthmani Quran, Sahih International English translations, 40 Hadith of Imam Nawawi, Sahih al-Bukhari.\n" +
-                                "• Privacy: All user preferences, bookmarks, and Dhikr history are stored locally on-device.\n" +
+                        text = "Islamic App is designed to serve Muslims worldwide with utmost reverence, verified Quranic texts, authentic graded Hadith, Hisnul Muslim supplications, Qibla direction, and accurate prayer schedules.\n\n" +
+                                "• Religious Texts: Authentic Uthmani Quran, Sahih International English, Maulana Jalandhari Urdu, and Farooq-i-Azam Malik Hindi translations.\n" +
+                                "• Privacy: All user preferences, bookmarks, and Dhikr history are stored locally on-device. No personal data is sold or exploited.\n" +
+                                "• Respectful Ads Policy: Religious devotion screens (Quran, Prayer, Azan, Qibla, Tasbeeh, Duas) are 100% ad-free.\n" +
                                 "• Note on Prayer Times: Prayer times are calculated according to established astronomical algorithms. Verify with your local mosque if slight deviations occur.",
                         style = MaterialTheme.typography.bodySmall,
                         lineHeight = 18.sp
