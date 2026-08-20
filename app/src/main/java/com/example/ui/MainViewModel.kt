@@ -66,6 +66,7 @@ enum class NavigationTab {
 
 enum class ExploreSubScreen {
     MAIN_MENU,
+    NAMAZ_GUIDE,
     DUA_LIST,
     HADITH_LIST,
     TASBEEH,
@@ -157,7 +158,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val zakatResult: StateFlow<ZakatCalculationResult> = _zakatResult.asStateFlow()
 
     // Location & Calculation Preferences
-    val appLanguage = preferences.languageFlow.stateIn(viewModelScope, SharingStarted.Eagerly, AppLanguage.ENGLISH)
+    val appLanguage = preferences.languageFlow.stateIn(viewModelScope, SharingStarted.Eagerly, AppLanguage.URDU)
     val prayerMethod = preferences.calculationMethodFlow.stateIn(viewModelScope, SharingStarted.Eagerly, CalculationMethod.KARACHI)
     val asrMadhab = preferences.asrMadhabFlow.stateIn(viewModelScope, SharingStarted.Eagerly, AsrJuristic.HANAFI)
     val cityName = preferences.selectedCityFlow.stateIn(viewModelScope, SharingStarted.Eagerly, "New Delhi")
@@ -168,6 +169,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val hijriAdjustment = preferences.hijriAdjustmentFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
     val arabicFontSize = preferences.arabicFontSizeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 26)
     val tasbeehVibrate = preferences.tasbeehVibrateFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    // Daily 5-Prayer Tracker
+    val todayDateString: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    val prayerTrackerState = preferences.getDailyPrayerTrackerFlow(todayDateString)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.example.data.model.DailyPrayerTrackerState(todayDateString))
+
+    fun togglePrayerTracked(prayerName: PrayerName) {
+        viewModelScope.launch {
+            preferences.togglePrayerDone(prayerName, todayDateString)
+            triggerHapticFeedback()
+        }
+    }
+
+    fun setLanguage(language: AppLanguage) {
+        viewModelScope.launch {
+            preferences.setLanguage(language)
+        }
+    }
 
     // Bookmarks Flow
     val allBookmarks = database.bookmarkDao().getAllBookmarks()

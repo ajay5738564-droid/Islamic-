@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +26,10 @@ import com.example.data.repository.HijriCalendarRepository
 import com.example.ui.ExploreSubScreen
 import com.example.ui.MainViewModel
 import com.example.ui.NavigationTab
+import com.example.ui.components.DailyNamazTrackerCard
 import com.example.ui.components.NextPrayerCountdownCard
 import com.example.ui.theme.ArabicTextStyle
+import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.GoldAccent
 import com.example.ui.theme.GoldLight
 import java.text.SimpleDateFormat
@@ -43,6 +44,7 @@ fun PrayerScreen(
     modifier: Modifier = Modifier
 ) {
     val schedule by viewModel.dailyPrayerSchedule.collectAsState()
+    val trackerState by viewModel.prayerTrackerState.collectAsState()
     val cityName by viewModel.cityName.collectAsState()
     val countryName by viewModel.countryName.collectAsState()
     val prayerMethod by viewModel.prayerMethod.collectAsState()
@@ -78,7 +80,7 @@ fun PrayerScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Prayer Times (مواقيت الصلاة)",
+                                text = "اوقاتِ نماز اور ۵ وقت کی نماز",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -96,7 +98,7 @@ fun PrayerScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.EditLocationAlt,
-                                contentDescription = "Change Location",
+                                contentDescription = "مقام تبدیل کریں",
                                 tint = Color.White
                             )
                         }
@@ -123,21 +125,98 @@ fun PrayerScreen(
             }
         }
 
-        // Today's Detailed 6 Prayer Rows
+        // Daily 5-Prayer Tracker Card
         item {
-            Text(
-                text = "Today's Schedule",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-            )
+            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                DailyNamazTrackerCard(
+                    trackerState = trackerState,
+                    onTogglePrayer = { viewModel.togglePrayerTracked(it) },
+                    onOpenFullGuide = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE)
+                    }
+                )
+            }
+        }
+
+        // Today's Detailed Prayer Rows
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "آج کے اوقاتِ نماز",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                TextButton(
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE)
+                    }
+                ) {
+                    Text("مکمل طریقہ و رکعتیں", color = EmeraldPrimary, fontWeight = FontWeight.SemiBold)
+                }
+            }
         }
 
         if (schedule != null) {
             items(schedule!!.prayers.size) { index ->
                 val slot = schedule!!.prayers[index]
                 DetailedPrayerRow(slot = slot)
+            }
+        }
+
+        // 5 Times Namaz Guide Feature Banner Card
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .testTag("prayer_namaz_guide_banner"),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Mosque,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(26.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "۵ وقت کی نماز کی رکعتیں اور طریقہ",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "فجر، ظہر، عصر، مغرب اور عشاء کی سنتیں، فرائض، وتر، ثناء، تشہد، درود ابراہیمی اور دعائے قنوت مع ترجمہ۔",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    FilledTonalButton(
+                        onClick = {
+                            viewModel.setTab(NavigationTab.EXPLORE)
+                            viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("۵ وقت کی نماز کی کتاب اور گائیڈ کھولیں")
+                    }
+                }
             }
         }
 
@@ -170,7 +249,7 @@ fun PrayerScreen(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Explore,
-                                    contentDescription = "Qibla",
+                                    contentDescription = "قبلہ نما",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -178,13 +257,13 @@ fun PrayerScreen(
 
                         Column {
                             Text(
-                                text = "Qibla Direction: ${String.format(Locale.US, "%.1f°", qiblaBearing)}",
+                                text = "قبلہ کی سمت: ${String.format(Locale.US, "%.1f°", qiblaBearing)}",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Distance to Kaaba: ${String.format(Locale.US, "%,.0f km", distanceKm)}",
+                                text = "خانہ کعبہ کا فاصلہ: ${String.format(Locale.US, "%,.0f km", distanceKm)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -198,7 +277,7 @@ fun PrayerScreen(
                         },
                         modifier = Modifier.testTag("open_qibla_compass_btn")
                     ) {
-                        Text("Compass")
+                        Text("قطب نما")
                     }
                 }
             }
@@ -217,19 +296,19 @@ fun PrayerScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Calculation Settings",
+                        text = "طریقہ حساب اور فقہی ترتیبات",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "• Method: ${prayerMethod.displayName}",
+                        text = "• حساب کا طریقہ: ${prayerMethod.displayName}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "• Asr Juristic (Madhab): ${asrMadhab.displayName}",
+                        text = "• نمازِ عصر کا فقہی مسلک: ${asrMadhab.displayName}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -248,6 +327,15 @@ fun DetailedPrayerRow(
 
     val isNext = slot.isNext
     val isCurrent = slot.isCurrent
+
+    val prayerNameUrdu = when (slot.name) {
+        PrayerName.FAJR -> "فجر"
+        PrayerName.SUNRISE -> "طلوع آفتاب"
+        PrayerName.DHUHR -> "ظہر"
+        PrayerName.ASR -> "عصر"
+        PrayerName.MAGHRIB -> "مغرب"
+        PrayerName.ISHA -> "عشاء"
+    }
 
     val cardColor = when {
         isNext -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
@@ -301,7 +389,7 @@ fun DetailedPrayerRow(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = slot.name.displayName,
+                            text = "$prayerNameUrdu (${slot.name.displayName})",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = if (isNext) FontWeight.Bold else FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -313,7 +401,7 @@ fun DetailedPrayerRow(
                                 color = MaterialTheme.colorScheme.primary
                             ) {
                                 Text(
-                                    text = "NEXT",
+                                    text = "اگلی نماز",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -346,7 +434,7 @@ fun DetailedPrayerRow(
                     ) {
                         Icon(
                             imageVector = if (notificationEnabled) Icons.Outlined.NotificationsActive else Icons.Outlined.Notifications,
-                            contentDescription = "Toggle Notification",
+                            contentDescription = "آذان الرٹ",
                             tint = if (notificationEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                             modifier = Modifier.size(20.dp)
                         )
@@ -356,3 +444,4 @@ fun DetailedPrayerRow(
         }
     }
 }
+

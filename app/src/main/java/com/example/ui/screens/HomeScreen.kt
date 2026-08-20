@@ -56,6 +56,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val schedule by viewModel.dailyPrayerSchedule.collectAsState()
+    val trackerState by viewModel.prayerTrackerState.collectAsState()
     val cityName by viewModel.cityName.collectAsState()
     val countryName by viewModel.countryName.collectAsState()
     val hijriAdjustment by viewModel.hijriAdjustment.collectAsState()
@@ -123,13 +124,13 @@ fun HomeScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Welcome to Deenova",
+                                text = "دین و دنیا کی رہنمائی",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                             Text(
-                                text = "Your daily spiritual companion for Quran, Prayer & Dhikr",
+                                text = "قرآن پاک، ۵ وقت کی نماز اور مسنون اذکار کے لیے آپ کا ہم سفر",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = GoldLight
                             )
@@ -149,14 +150,30 @@ fun HomeScreen(
             }
         }
 
+        // 5 Time Daily Namaz Tracker Card
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                com.example.ui.components.DailyNamazTrackerCard(
+                    trackerState = trackerState,
+                    onTogglePrayer = { viewModel.togglePrayerTracked(it) },
+                    onOpenFullGuide = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE)
+                    }
+                )
+            }
+        }
+
         // Quick Access Features Grid
         item {
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Quick Access",
+                text = "اہم سہولیات و فیچرز",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)
             )
 
             Row(
@@ -166,14 +183,23 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 QuickAccessButton(
+                    icon = Icons.Default.Mosque,
+                    label = "۵ وقت نماز",
+                    testTag = "quick_namaz_guide",
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE)
+                    }
+                )
+                QuickAccessButton(
                     icon = Icons.Default.AutoStories,
-                    label = "Quran",
+                    label = "قرآن پاک",
                     testTag = "quick_quran",
                     onClick = { viewModel.setTab(NavigationTab.QURAN) }
                 )
                 QuickAccessButton(
                     icon = Icons.Default.CompassCalibration,
-                    label = "Qibla",
+                    label = "قبلہ نما",
                     testTag = "quick_qibla",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -182,20 +208,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.FilterVintage,
-                    label = "Tasbeeh",
+                    label = "تسبیح",
                     testTag = "quick_tasbeeh",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
                         viewModel.setExploreSubScreen(ExploreSubScreen.TASBEEH)
-                    }
-                )
-                QuickAccessButton(
-                    icon = Icons.Default.Favorite,
-                    label = "Duas",
-                    testTag = "quick_duas",
-                    onClick = {
-                        viewModel.setTab(NavigationTab.EXPLORE)
-                        viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST)
                     }
                 )
             }
@@ -209,8 +226,17 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 QuickAccessButton(
+                    icon = Icons.Default.Favorite,
+                    label = "دعائیں",
+                    testTag = "quick_duas",
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST)
+                    }
+                )
+                QuickAccessButton(
                     icon = Icons.Default.MenuBook,
-                    label = "Hadith",
+                    label = "احادیث",
                     testTag = "quick_hadith",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -219,7 +245,7 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.CalendarMonth,
-                    label = "Calendar",
+                    label = "تقویم",
                     testTag = "quick_calendar",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -227,17 +253,8 @@ fun HomeScreen(
                     }
                 )
                 QuickAccessButton(
-                    icon = Icons.Default.Nightlight,
-                    label = "Ramadan",
-                    testTag = "quick_ramadan",
-                    onClick = {
-                        viewModel.setTab(NavigationTab.EXPLORE)
-                        viewModel.setExploreSubScreen(ExploreSubScreen.RAMADAN_DASHBOARD)
-                    }
-                )
-                QuickAccessButton(
                     icon = Icons.Default.Calculate,
-                    label = "Zakat",
+                    label = "زکوٰۃ",
                     testTag = "quick_zakat",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)

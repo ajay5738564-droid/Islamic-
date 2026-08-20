@@ -64,6 +64,7 @@ fun ExploreScreen(
 
     when (subScreen) {
         ExploreSubScreen.MAIN_MENU -> ExploreMainMenu(viewModel = viewModel, modifier = modifier)
+        ExploreSubScreen.NAMAZ_GUIDE -> NamazGuideScreen(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.DUA_LIST -> DuaExplorerView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.HADITH_LIST -> HadithExplorerView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.TASBEEH -> DigitalTasbeehView(viewModel = viewModel, modifier = modifier)
@@ -99,14 +100,14 @@ fun ExploreMainMenu(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "Islamic Explore & Tools",
+                        text = "اسلامی معلومات و خدمات",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = "Dua, Hadith, Tasbeeh, Qibla, Zakat, Calendar & Knowledge",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = "۵ وقت کی نماز، دعائیں، احادیث، تسبیح، قبلہ، زکوٰۃ اور اسلامی تقویم",
+                        style = MaterialTheme.typography.bodySmall,
                         color = GoldLight
                     )
                 }
@@ -116,7 +117,7 @@ fun ExploreMainMenu(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Spiritual Essentials",
+                text = "اہم عبادات و خدمات",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -130,33 +131,42 @@ fun ExploreMainMenu(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Top Prominent 5 Times Namaz Card
                 ExploreFeatureCard(
-                    title = "Duas & Supplications (أدعية)",
-                    subtitle = "15+ categories from Hisn al-Muslim with translations & counts",
+                    title = "۵ وقت کی نماز اور مکمل طریقہ (صلاۃ)",
+                    subtitle = "فجر، ظہر، عصر، مغرب اور عشاء کی رکعتیں، دعائیں اور مکمل طریقہ",
+                    icon = Icons.Default.Mosque,
+                    testTag = "explore_item_namaz_guide",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE) }
+                )
+
+                ExploreFeatureCard(
+                    title = "مسنون دعائیں اور اذکار (أدعية)",
+                    subtitle = "حصن المسلم سے روزمرہ زندگی کی مستند دعائیں اور فضائل",
                     icon = Icons.Default.Favorite,
                     testTag = "explore_item_duas",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Hadith Collections (الحديث النبوي)",
-                    subtitle = "Authentic graded Hadiths (40 Nawawi & Sahih al-Bukhari)",
+                    title = "احادیثِ نبوی ﷺ (الحديث الشريف)",
+                    subtitle = "اربعین نووی اور صحیح بخاری کی منتخب صحیح احادیث",
                     icon = Icons.Default.MenuBook,
                     testTag = "explore_item_hadith",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.HADITH_LIST) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Digital Tasbeeh & Dhikr Counter",
-                    subtitle = "Interactive beads, haptic feedback, custom targets & session history",
+                    title = "ڈیجیٹل تسبیح و اذکار کاؤنٹر",
+                    subtitle = "تسبیحاتِ فاطمی، وائبریشن اور روزانہ اذکار کا مکمل ریکارڈ",
                     icon = Icons.Default.FilterVintage,
                     testTag = "explore_item_tasbeeh",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.TASBEEH) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Live Qibla Compass (اتجاه القبلة)",
-                    subtitle = "Accurate sensor orientation pointing directly towards Kaaba in Makkah",
+                    title = "قبلہ نما قطب نما (اتجاہ القبلة)",
+                    subtitle = "سینسرز کے ذریعے خانہ کعبہ (مکہ مکرمہ) کی سمت کی درست رہنمائی",
                     icon = Icons.Default.CompassCalibration,
                     testTag = "explore_item_qibla",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.QIBLA) }
@@ -167,7 +177,7 @@ fun ExploreMainMenu(
         item {
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Occasions & Obligations",
+                text = "مناسبات اور ارکانِ اسلام",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,

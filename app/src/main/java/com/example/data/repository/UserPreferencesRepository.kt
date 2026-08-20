@@ -9,15 +9,20 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.data.model.AsrJuristic
 import com.example.data.model.CalculationMethod
+import com.example.data.model.DailyPrayerTrackerState
+import com.example.data.model.PrayerName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 val Context.dataStore by preferencesDataStore(name = "deenova_prefs")
 
 enum class AppLanguage(val code: String, val displayName: String, val nativeName: String) {
+    URDU("ur", "Urdu", "اردو"),
     ENGLISH("en", "English", "English"),
     HINDI("hi", "Hindi", "हिन्दी"),
-    URDU("ur", "Urdu", "اردو"),
     ARABIC("ar", "Arabic", "العربية")
 }
 
@@ -44,11 +49,13 @@ class UserPreferencesRepository(private val context: Context) {
         val TASBEEH_VIBRATE = booleanPreferencesKey("tasbeeh_vibrate")
         val TASBEEH_SOUND = booleanPreferencesKey("tasbeeh_sound")
         val DARK_THEME = booleanPreferencesKey("dark_theme")
+
+        fun prayerKey(dateStr: String, prayer: PrayerName) = booleanPreferencesKey("prayer_${dateStr}_${prayer.name}")
     }
 
     val languageFlow: Flow<AppLanguage> = context.dataStore.data.map { prefs ->
-        val code = prefs[PreferencesKeys.LANGUAGE] ?: "en"
-        AppLanguage.values().find { it.code == code } ?: AppLanguage.ENGLISH
+        val code = prefs[PreferencesKeys.LANGUAGE] ?: "ur"
+        AppLanguage.values().find { it.code == code } ?: AppLanguage.URDU
     }
 
     val calculationMethodFlow: Flow<CalculationMethod> = context.dataStore.data.map { prefs ->
@@ -152,5 +159,26 @@ class UserPreferencesRepository(private val context: Context) {
 
     suspend fun setTasbeehSound(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.TASBEEH_SOUND] = enabled }
+    }
+
+    fun getDailyPrayerTrackerFlow(dateStr: String): Flow<DailyPrayerTrackerState> {
+        return context.dataStore.data.map { prefs ->
+            DailyPrayerTrackerState(
+                dateStr = dateStr,
+                fajrDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.FAJR)] ?: false,
+                dhuhrDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.DHUHR)] ?: false,
+                asrDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.ASR)] ?: false,
+                maghribDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.MAGHRIB)] ?: false,
+                ishaDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.ISHA)] ?: false
+            )
+        }
+    }
+
+    suspend fun togglePrayerDone(prayerName: PrayerName, dateStr: String) {
+        context.dataStore.edit { prefs ->
+            val key = PreferencesKeys.prayerKey(dateStr, prayerName)
+            val current = prefs[key] ?: false
+            prefs[key] = !current
+        }
     }
 }

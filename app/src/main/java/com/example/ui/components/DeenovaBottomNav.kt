@@ -37,10 +37,10 @@ fun DeenovaBottomNavigation(
             icon = {
                 Icon(
                     imageVector = if (selectedTab == NavigationTab.HOME) Icons.Filled.Home else Icons.Outlined.Home,
-                    contentDescription = "Home"
+                    contentDescription = "صفحہ اول"
                 )
             },
-            label = { Text("Home") },
+            label = { Text("ہوم") },
             modifier = Modifier.testTag("nav_item_home")
         )
 
@@ -50,10 +50,10 @@ fun DeenovaBottomNavigation(
             icon = {
                 Icon(
                     imageVector = if (selectedTab == NavigationTab.QURAN) Icons.Filled.AutoStories else Icons.Outlined.AutoStories,
-                    contentDescription = "Quran"
+                    contentDescription = "قرآن پاک"
                 )
             },
-            label = { Text("Quran") },
+            label = { Text("قرآن پاک") },
             modifier = Modifier.testTag("nav_item_quran")
         )
 
@@ -63,10 +63,10 @@ fun DeenovaBottomNavigation(
             icon = {
                 Icon(
                     imageVector = if (selectedTab == NavigationTab.PRAYER) Icons.Filled.Mosque else Icons.Outlined.Mosque,
-                    contentDescription = "Prayer Times"
+                    contentDescription = "اوقاتِ نماز"
                 )
             },
-            label = { Text("Prayer") },
+            label = { Text("نماز") },
             modifier = Modifier.testTag("nav_item_prayer")
         )
 
@@ -76,10 +76,10 @@ fun DeenovaBottomNavigation(
             icon = {
                 Icon(
                     imageVector = if (selectedTab == NavigationTab.EXPLORE) Icons.Filled.Explore else Icons.Outlined.Explore,
-                    contentDescription = "Explore"
+                    contentDescription = "اسلامی معلومات"
                 )
             },
-            label = { Text("Explore") },
+            label = { Text("معلومات") },
             modifier = Modifier.testTag("nav_item_explore")
         )
 
@@ -89,10 +89,10 @@ fun DeenovaBottomNavigation(
             icon = {
                 Icon(
                     imageVector = if (selectedTab == NavigationTab.MORE) Icons.Filled.Menu else Icons.Outlined.Menu,
-                    contentDescription = "Settings"
+                    contentDescription = "ترتیبات"
                 )
             },
-            label = { Text("More") },
+            label = { Text("ترتیبات") },
             modifier = Modifier.testTag("nav_item_more")
         )
     }

@@ -67,25 +67,25 @@ fun SettingsScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "Settings & Preferences (الإعدادات)",
+                        text = "ترتیبات اور ترجیحات (الإعدادات)",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = "Customize calculations, language, typography & locations",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = "طریقہ حساب، زبان، فونٹ سائز اور ذاتی ترتیبات",
+                        style = MaterialTheme.typography.bodySmall,
                         color = GoldLight
                     )
                 }
             }
         }
 
-        // Section: Location & Prayer Calculations
+        // Section: 5 Times Namaz & Tracker
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Prayer Times & Location",
+                text = "۵ وقت کی نماز اور عبادات",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -95,7 +95,32 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "Selected City",
+                title = "۵ وقت کی نماز کا مکمل طریقہ اور رکعتیں",
+                subtitle = "فجر، ظہر، عصر، مغرب اور عشاء کی رکعتیں، دعائیں اور وضو",
+                icon = Icons.Default.Mosque,
+                testTag = "setting_namaz_guide_item",
+                onClick = {
+                    viewModel.setTab(com.example.ui.NavigationTab.EXPLORE)
+                    viewModel.setExploreSubScreen(com.example.ui.ExploreSubScreen.NAMAZ_GUIDE)
+                }
+            )
+        }
+
+        // Section: Location & Prayer Calculations
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = "اوقاتِ نماز اور مقام کی ترتیبات",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+            )
+        }
+
+        item {
+            SettingsItemCard(
+                title = "منتخب کردہ شہر اور ملک",
                 subtitle = "$cityName, $countryName",
                 icon = Icons.Default.LocationOn,
                 testTag = "setting_location_item",
@@ -105,7 +130,7 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "Calculation Method",
+                title = "طریقہ حساب (Calculation Method)",
                 subtitle = calculationMethod.displayName,
                 icon = Icons.Default.Calculate,
                 testTag = "setting_calc_method_item",
@@ -115,7 +140,7 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "Asr Juristic Method (Madhab)",
+                title = "نمازِ عصر کا فقہی مسلک (Madhab)",
                 subtitle = asrMadhab.displayName,
                 icon = Icons.Default.Schedule,
                 testTag = "setting_asr_madhab_item",
@@ -125,8 +150,8 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "Hijri Date Adjustment",
-                subtitle = if (hijriAdjustment == 0) "Standard (0 days)" else "$hijriAdjustment days",
+                title = "ہجری تاریخ میں رد و بدل (Adjustment)",
+                subtitle = if (hijriAdjustment == 0) "معیاری (0 دن)" else "$hijriAdjustment دن",
                 icon = Icons.Default.CalendarMonth,
                 testTag = "setting_hijri_adjust_item",
                 onClick = {
@@ -140,7 +165,7 @@ fun SettingsScreen(
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Language & Reading",
+                text = "زبان اور قرآنی رسم الخط",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -150,7 +175,7 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "App Language",
+                title = "ایپ کی زبان (Language)",
                 subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName})",
                 icon = Icons.Default.Language,
                 testTag = "setting_language_item",
@@ -174,7 +199,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Arabic Quran Font Size",
+                            text = "قرآنی عربی فونٹ کا سائز",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -201,7 +226,7 @@ fun SettingsScreen(
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Dhikr & Personal Storage",
+                text = "تسبیح اور ذاتی بک مارکس",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -227,13 +252,13 @@ fun SettingsScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Tasbeeh Haptic Vibration",
+                            text = "تسبیح وائبریشن (Haptic Feedback)",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Vibrate on bead touch and target completion",
+                            text = "ہر دانے پر اور ۱۰۰ مکمل ہونے پر وائبریشن",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
