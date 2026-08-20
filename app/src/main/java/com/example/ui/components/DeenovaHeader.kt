@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
@@ -38,7 +39,8 @@ fun DeenovaTopHeader(
     onLocationClick: () -> Unit,
     onSearchClick: () -> Unit,
     onBookmarksClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLanguageClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -97,7 +99,7 @@ fun DeenovaTopHeader(
                                 letterSpacing = 0.5.sp
                             )
                             Text(
-                                text = "دينوفا • All-in-One Islamic Guide",
+                                text = "دینوفا • All-in-One Islamic Guide",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = GoldLight
                             )
@@ -105,7 +107,21 @@ fun DeenovaTopHeader(
                     }
 
                     // Action Icons
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = onLanguageClick,
+                            modifier = Modifier.testTag("top_language_btn")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = "Change Language",
+                                tint = GoldLight
+                            )
+                        }
+
                         IconButton(
                             onClick = onSearchClick,
                             modifier = Modifier.testTag("top_search_btn")

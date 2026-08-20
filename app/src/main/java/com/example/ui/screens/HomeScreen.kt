@@ -53,7 +53,8 @@ fun HomeScreen(
     onOpenLocationPicker: () -> Unit,
     onOpenGlobalSearch: () -> Unit,
     onOpenBookmarks: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenLanguagePicker: () -> Unit = {}
 ) {
     val schedule by viewModel.dailyPrayerSchedule.collectAsState()
     val trackerState by viewModel.prayerTrackerState.collectAsState()
@@ -62,6 +63,7 @@ fun HomeScreen(
     val hijriAdjustment by viewModel.hijriAdjustment.collectAsState()
     val currentAyahPlaying by viewModel.currentPlayingAyah.collectAsState()
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
+    val currentLanguage by viewModel.appLanguage.collectAsState()
 
     val now = Calendar.getInstance()
     val hijriInfo = HijriCalendarRepository.getHijriDate(now, hijriAdjustment)
@@ -83,11 +85,12 @@ fun HomeScreen(
         item {
             DeenovaTopHeader(
                 gregorianDate = gregorianFormat,
-                hijriDate = hijriInfo.formatted,
+                hijriDate = if (currentLanguage == com.example.data.repository.AppLanguage.URDU) hijriInfo.formattedUrdu else hijriInfo.formatted,
                 locationName = "$cityName, $countryName",
                 onLocationClick = onOpenLocationPicker,
                 onSearchClick = onOpenGlobalSearch,
-                onBookmarksClick = onOpenBookmarks
+                onBookmarksClick = onOpenBookmarks,
+                onLanguageClick = onOpenLanguagePicker
             )
         }
 
@@ -124,13 +127,21 @@ fun HomeScreen(
                     ) {
                         Column {
                             Text(
-                                text = "دین و دنیا کی رہنمائی",
+                                text = when (currentLanguage) {
+                                    com.example.data.repository.AppLanguage.URDU -> "دین و دنیا کی رہنمائی"
+                                    com.example.data.repository.AppLanguage.HINDI -> "दीन व दुनिया का मार्गदर्शन"
+                                    else -> "Islamic Guidance & Lifestyle"
+                                },
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                             Text(
-                                text = "قرآن پاک، ۵ وقت کی نماز اور مسنون اذکار کے لیے آپ کا ہم سفر",
+                                text = when (currentLanguage) {
+                                    com.example.data.repository.AppLanguage.URDU -> "قرآن پاک، ۵ وقت کی نماز اور مسنون اذکار کے لیے آپ کا ہم سفر"
+                                    com.example.data.repository.AppLanguage.HINDI -> "क़ुरआन, ५ वक़्त की नमाज़, अज़ान व मसनून दुआओं का साथी"
+                                    else -> "Your complete companion for Quran, 5 Prayers & Azan"
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = GoldLight
                             )
@@ -169,7 +180,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "اہم سہولیات و فیچرز",
+                text = com.example.ui.util.AppStrings.quickFeatures(currentLanguage),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -184,7 +195,11 @@ fun HomeScreen(
             ) {
                 QuickAccessButton(
                     icon = Icons.Default.Mosque,
-                    label = "۵ وقت نماز",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "۵ وقت نماز"
+                        com.example.data.repository.AppLanguage.HINDI -> "५ वक़्त नमाज़"
+                        else -> "5 Prayers"
+                    },
                     testTag = "quick_namaz_guide",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -193,7 +208,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.Headphones,
-                    label = "نعت و حمد",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "نعت و حمد"
+                        com.example.data.repository.AppLanguage.HINDI -> "नात व हम्द"
+                        else -> "Naat & Hamd"
+                    },
                     testTag = "quick_naat_player",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -202,7 +221,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.AutoAwesome,
-                    label = "۹۹ نام",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "۹۹ نام"
+                        com.example.data.repository.AppLanguage.HINDI -> "९९ नाम"
+                        else -> "99 Names"
+                    },
                     testTag = "quick_names_of_allah",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -211,7 +234,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.NotificationsActive,
-                    label = "اذان الارم",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "اذان الارم"
+                        com.example.data.repository.AppLanguage.HINDI -> "अज़ान अलार्म"
+                        else -> "Azan Alarm"
+                    },
                     testTag = "quick_azan_alarms",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -230,13 +257,21 @@ fun HomeScreen(
             ) {
                 QuickAccessButton(
                     icon = Icons.Default.AutoStories,
-                    label = "قرآن پاک",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "قرآن پاک"
+                        com.example.data.repository.AppLanguage.HINDI -> "क़ुरआन पाक"
+                        else -> "Quran"
+                    },
                     testTag = "quick_quran",
                     onClick = { viewModel.setTab(NavigationTab.QURAN) }
                 )
                 QuickAccessButton(
                     icon = Icons.Default.CompassCalibration,
-                    label = "قبلہ نما",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "قبلہ نما"
+                        com.example.data.repository.AppLanguage.HINDI -> "क़िबला रुख"
+                        else -> "Qibla"
+                    },
                     testTag = "quick_qibla",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -245,7 +280,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.FilterVintage,
-                    label = "تسبیح",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "تسبیح"
+                        com.example.data.repository.AppLanguage.HINDI -> "तसबीह"
+                        else -> "Tasbeeh"
+                    },
                     testTag = "quick_tasbeeh",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -254,7 +293,11 @@ fun HomeScreen(
                 )
                 QuickAccessButton(
                     icon = Icons.Default.CalendarMonth,
-                    label = "تقویم",
+                    label = when (currentLanguage) {
+                        com.example.data.repository.AppLanguage.URDU -> "تقویم"
+                        com.example.data.repository.AppLanguage.HINDI -> "कैलेंडर"
+                        else -> "Calendar"
+                    },
                     testTag = "quick_calendar",
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
@@ -275,13 +318,20 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "آج کی منتخب آیت",
+                    text = com.example.ui.util.AppStrings.verseOfTheDay(currentLanguage),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 TextButton(onClick = { viewModel.setTab(NavigationTab.QURAN) }) {
-                    Text("مکمل قرآن", color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = when (currentLanguage) {
+                            com.example.data.repository.AppLanguage.URDU -> "مکمل قرآن"
+                            com.example.data.repository.AppLanguage.HINDI -> "पूरा क़ुरआन"
+                            else -> "Full Quran"
+                        },
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
@@ -320,7 +370,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "آج کی مسنون دعا",
+                    text = com.example.ui.util.AppStrings.duaOfTheDay(currentLanguage),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -329,7 +379,14 @@ fun HomeScreen(
                     viewModel.setTab(NavigationTab.EXPLORE)
                     viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST)
                 }) {
-                    Text("تمام دعائیں", color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = when (currentLanguage) {
+                            com.example.data.repository.AppLanguage.URDU -> "تمام دعائیں"
+                            com.example.data.repository.AppLanguage.HINDI -> "सभी दुआएं"
+                            else -> "All Duas"
+                        },
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
@@ -364,7 +421,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "آج کی حدیثِ مبارکہ",
+                    text = com.example.ui.util.AppStrings.hadithOfTheDay(currentLanguage),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -373,7 +430,14 @@ fun HomeScreen(
                     viewModel.setTab(NavigationTab.EXPLORE)
                     viewModel.setExploreSubScreen(ExploreSubScreen.HADITH_LIST)
                 }) {
-                    Text("تمام احادیث", color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = when (currentLanguage) {
+                            com.example.data.repository.AppLanguage.URDU -> "تمام احادیث"
+                            com.example.data.repository.AppLanguage.HINDI -> "सभी हदीसें"
+                            else -> "All Hadiths"
+                        },
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
@@ -401,7 +465,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "آنے والے اہم اسلامی ایام و مناسبات",
+                text = com.example.ui.util.AppStrings.upcomingEvents(currentLanguage),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,

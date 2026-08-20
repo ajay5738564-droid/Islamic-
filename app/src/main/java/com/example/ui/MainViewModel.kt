@@ -444,7 +444,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _tasbeehTarget.value = target
     }
 
-    private fun triggerHapticFeedback() {
+    fun triggerHapticFeedback() {
         if (!tasbeehVibrate.value) return
         try {
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

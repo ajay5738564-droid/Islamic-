@@ -30,7 +30,8 @@ fun SettingsScreen(
     viewModel: MainViewModel,
     onOpenLocationPicker: () -> Unit,
     onOpenBookmarks: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenLanguagePicker: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -44,7 +45,6 @@ fun SettingsScreen(
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
     val tasbeehVibrate by viewModel.tasbeehVibrate.collectAsState()
 
-    var showLanguageDialog by remember { mutableStateOf(false) }
     var showMethodDialog by remember { mutableStateOf(false) }
     var showMadhabDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
@@ -67,13 +67,21 @@ fun SettingsScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = "ترتیبات اور ترجیحات (الإعدادات)",
+                        text = when (currentLanguage) {
+                            AppLanguage.URDU -> "ترتیبات اور ترجیحات (الإعدادات)"
+                            AppLanguage.HINDI -> "सेटिंग्स व प्राथमिकताएं"
+                            else -> "Settings & Preferences"
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = "طریقہ حساب، زبان، فونٹ سائز اور ذاتی ترتیبات",
+                        text = when (currentLanguage) {
+                            AppLanguage.URDU -> "طریقہ حساب، زبان، فونٹ سائز اور ذاتی ترتیبات"
+                            AppLanguage.HINDI -> "गणना विधि, भाषा, फ़ॉन्ट आकार व निजी सेटिंग्स"
+                            else -> "Calculation methods, language, font size & custom preferences"
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = GoldLight
                     )
@@ -85,7 +93,11 @@ fun SettingsScreen(
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "۵ وقت کی نماز اور عبادات",
+                text = when (currentLanguage) {
+                    AppLanguage.URDU -> "۵ وقت کی نماز اور اذان الارم"
+                    AppLanguage.HINDI -> "५ वक़्त की नमाज़ व अज़ान अलार्म"
+                    else -> "5 Daily Prayers & Azan Alarms"
+                },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -95,8 +107,16 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "۵ وقت کی نماز کا مکمل طریقہ اور رکعتیں",
-                subtitle = "فجر، ظہر، عصر، مغرب اور عشاء کی رکعتیں، دعائیں اور وضو",
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "۵ وقت کی نماز کا مکمل طریقہ اور رکعتیں"
+                    AppLanguage.HINDI -> "५ वक़्त की नमाज़ का पूरा तरीक़ा व रकअतें"
+                    else -> "5 Daily Prayers Guide & Rak'ahs"
+                },
+                subtitle = when (currentLanguage) {
+                    AppLanguage.URDU -> "فجر، ظہر، عصر، مغرب اور عشاء کی رکعتیں، دعائیں اور وضو"
+                    AppLanguage.HINDI -> "फ़ज्र, ज़ुहर, असर, मग़रिब व इशा की रकअतें, दुआएं व वुज़ू"
+                    else -> "Fajr, Dhuhr, Asr, Maghrib & Isha breakdown"
+                },
                 icon = Icons.Default.Mosque,
                 testTag = "setting_namaz_guide_item",
                 onClick = {
@@ -106,57 +126,23 @@ fun SettingsScreen(
             )
         }
 
-        // Section: Location & Prayer Calculations
-        item {
-            Spacer(modifier = Modifier.height(14.dp))
-            Text(
-                text = "اوقاتِ نماز اور مقام کی ترتیبات",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
-            )
-        }
-
         item {
             SettingsItemCard(
-                title = "منتخب کردہ شہر اور ملک",
-                subtitle = "$cityName, $countryName",
-                icon = Icons.Default.LocationOn,
-                testTag = "setting_location_item",
-                onClick = onOpenLocationPicker
-            )
-        }
-
-        item {
-            SettingsItemCard(
-                title = "طریقہ حساب (Calculation Method)",
-                subtitle = calculationMethod.displayName,
-                icon = Icons.Default.Calculate,
-                testTag = "setting_calc_method_item",
-                onClick = { showMethodDialog = true }
-            )
-        }
-
-        item {
-            SettingsItemCard(
-                title = "نمازِ عصر کا فقہی مسلک (Madhab)",
-                subtitle = asrMadhab.displayName,
-                icon = Icons.Default.Schedule,
-                testTag = "setting_asr_madhab_item",
-                onClick = { showMadhabDialog = true }
-            )
-        }
-
-        item {
-            SettingsItemCard(
-                title = "ہجری تاریخ میں رد و بدل (Adjustment)",
-                subtitle = if (hijriAdjustment == 0) "معیاری (0 دن)" else "$hijriAdjustment دن",
-                icon = Icons.Default.CalendarMonth,
-                testTag = "setting_hijri_adjust_item",
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "۵ وقت اذان و الارم نوٹیفکیشن ترتیبات"
+                    AppLanguage.HINDI -> "५ वक़्त अज़ान व अलार्म सेटिंग्स"
+                    else -> "5-Time Azan Alarm & Notification Settings"
+                },
+                subtitle = when (currentLanguage) {
+                    AppLanguage.URDU -> "فجر، ظہر، عصر، مغرب اور عشاء پر اذان اور الارم"
+                    AppLanguage.HINDI -> "सभी नमाज़ों पर अज़ान की आवाज़ व अलार्म"
+                    else -> "Configure full Azan audio and alarms"
+                },
+                icon = Icons.Default.NotificationsActive,
+                testTag = "setting_azan_alarms_item",
                 onClick = {
-                    val nextAdj = if (hijriAdjustment >= 2) -2 else hijriAdjustment + 1
-                    coroutineScope.launch { viewModel.preferences.setHijriAdjustment(nextAdj) }
+                    viewModel.setTab(com.example.ui.NavigationTab.EXPLORE)
+                    viewModel.setExploreSubScreen(com.example.ui.ExploreSubScreen.AZAN_SETTINGS)
                 }
             )
         }
@@ -165,7 +151,11 @@ fun SettingsScreen(
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "زبان اور قرآنی رسم الخط",
+                text = when (currentLanguage) {
+                    AppLanguage.URDU -> "زبان اور قرآنی رسم الخط"
+                    AppLanguage.HINDI -> "भाषा व लिपि सेटिंग्स"
+                    else -> "Language & Typography"
+                },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -175,11 +165,15 @@ fun SettingsScreen(
 
         item {
             SettingsItemCard(
-                title = "ایپ کی زبان (Language)",
-                subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName})",
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "ایپ کی زبان تبدیل کریں (Language)"
+                    AppLanguage.HINDI -> "ऐप की भाषा बदलें (Language)"
+                    else -> "Change Application Language"
+                },
+                subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName}) - اردو • हिन्दी • English",
                 icon = Icons.Default.Language,
                 testTag = "setting_language_item",
-                onClick = { showLanguageDialog = true }
+                onClick = onOpenLanguagePicker
             )
         }
 
@@ -303,36 +297,6 @@ fun SettingsScreen(
                 onClick = { showAboutDialog = true }
             )
         }
-    }
-
-    // Language Dialog
-    if (showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Select Application Language") },
-            text = {
-                Column {
-                    AppLanguage.values().forEach { lang ->
-                        ListItem(
-                            headlineContent = { Text(lang.displayName, fontWeight = FontWeight.Bold) },
-                            supportingContent = { Text(lang.nativeName) },
-                            trailingContent = {
-                                if (currentLanguage == lang) {
-                                    Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                }
-                            },
-                            modifier = Modifier.clickable {
-                                coroutineScope.launch { viewModel.preferences.setLanguage(lang) }
-                                showLanguageDialog = false
-                            }
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
-            }
-        )
     }
 
     // Calculation Method Dialog
