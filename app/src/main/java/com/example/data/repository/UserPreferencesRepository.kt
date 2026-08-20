@@ -49,8 +49,29 @@ class UserPreferencesRepository(private val context: Context) {
         val TASBEEH_VIBRATE = booleanPreferencesKey("tasbeeh_vibrate")
         val TASBEEH_SOUND = booleanPreferencesKey("tasbeeh_sound")
         val DARK_THEME = booleanPreferencesKey("dark_theme")
+        val AZAN_VOICE = stringPreferencesKey("azan_voice")
 
         fun prayerKey(dateStr: String, prayer: PrayerName) = booleanPreferencesKey("prayer_${dateStr}_${prayer.name}")
+        fun alarmKey(prayer: PrayerName) = booleanPreferencesKey("alarm_${prayer.name}")
+    }
+
+    val notifyFajrFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.FAJR)] ?: true }
+    val notifyDhuhrFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.DHUHR)] ?: true }
+    val notifyAsrFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.ASR)] ?: true }
+    val notifyMaghribFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.MAGHRIB)] ?: true }
+    val notifyIshaFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.ISHA)] ?: true }
+    val azanVoiceFlow: Flow<String> = context.dataStore.data.map { it[PreferencesKeys.AZAN_VOICE] ?: "Makkah" }
+
+    suspend fun togglePrayerAlarm(prayer: PrayerName) {
+        context.dataStore.edit { prefs ->
+            val key = PreferencesKeys.alarmKey(prayer)
+            val current = prefs[key] ?: true
+            prefs[key] = !current
+        }
+    }
+
+    suspend fun setAzanVoice(voice: String) {
+        context.dataStore.edit { it[PreferencesKeys.AZAN_VOICE] = voice }
     }
 
     val languageFlow: Flow<AppLanguage> = context.dataStore.data.map { prefs ->

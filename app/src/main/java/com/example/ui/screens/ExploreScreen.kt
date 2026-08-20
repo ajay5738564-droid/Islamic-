@@ -65,6 +65,9 @@ fun ExploreScreen(
     when (subScreen) {
         ExploreSubScreen.MAIN_MENU -> ExploreMainMenu(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.NAMAZ_GUIDE -> NamazGuideScreen(viewModel = viewModel, modifier = modifier)
+        ExploreSubScreen.NAAT_PLAYER -> NaatPlayerScreen(viewModel = viewModel, onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
+        ExploreSubScreen.NAMES_OF_ALLAH -> NamesOfAllahScreen(onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
+        ExploreSubScreen.AZAN_SETTINGS -> AzanSettingsScreen(viewModel = viewModel, onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
         ExploreSubScreen.DUA_LIST -> DuaExplorerView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.HADITH_LIST -> HadithExplorerView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.TASBEEH -> DigitalTasbeehView(viewModel = viewModel, modifier = modifier)
@@ -131,6 +134,33 @@ fun ExploreMainMenu(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Naat & Hamd Player Card
+                ExploreFeatureCard(
+                    title = "نعت و حمد شریف (آڈیو و کلام)",
+                    subtitle = "مشہور نعتیں، حمدِ باری تعالیٰ، درود و سلام مع مکمل اشعار اور پلئیر",
+                    icon = Icons.Default.Headphones,
+                    testTag = "explore_item_naat_player",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAAT_PLAYER) }
+                )
+
+                // 99 Names of Allah Card
+                ExploreFeatureCard(
+                    title = "اَسْمَاءُ الْحُسْنَىٰ (اللہ کے ۹۹ مبارک نام)",
+                    subtitle = "اللہ تعالیٰ کے صفاتی نام مع اردو معانی، انگریزی تلفظ اور فضائل و برکات",
+                    icon = Icons.Default.AutoAwesome,
+                    testTag = "explore_item_names_of_allah",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAMES_OF_ALLAH) }
+                )
+
+                // Azan & Alarm Settings Card
+                ExploreFeatureCard(
+                    title = "اذان و نماز الارم اور نوٹیفکیشن",
+                    subtitle = "۵ وقت کی اذان الرٹس، مکہ و مدینہ کی اذان کی آوازیں اور ٹیسٹ الارم",
+                    icon = Icons.Default.NotificationsActive,
+                    testTag = "explore_item_azan_settings",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.AZAN_SETTINGS) }
+                )
+
                 // Top Prominent 5 Times Namaz Card
                 ExploreFeatureCard(
                     title = "۵ وقت کی نماز اور مکمل طریقہ (صلاۃ)",
@@ -177,7 +207,7 @@ fun ExploreMainMenu(
         item {
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "مناسبات اور ارکانِ اسلام",
+                text = "اسلامی تقویم، ارکان و معلومات",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -191,40 +221,40 @@ fun ExploreMainMenu(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 ExploreFeatureCard(
-                    title = "Islamic Calendar & Key Occasions",
-                    subtitle = "Hijri conversion, lunar months, and historical Islamic milestones",
+                    title = "اسلامی کیلنڈر و تاریخی ایام (التقويم الهجري)",
+                    subtitle = "قمری مہینے، ہجری تاریخ اور اہم اسلامی تاریخی واقعات",
                     icon = Icons.Default.CalendarMonth,
                     testTag = "explore_item_calendar",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_CALENDAR) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Ramadan & Fasting Companion",
-                    subtitle = "Sehri & Iftar timetable, fasting etiquette & Laylatul Qadr duas",
+                    title = "رمضان المبارک اور روزے کے احکام",
+                    subtitle = "سحر و افطار، روزے کی دعائیں، تراویح اور شبِ قدر کے اعمال",
                     icon = Icons.Default.Nightlight,
                     testTag = "explore_item_ramadan",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.RAMADAN_DASHBOARD) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Hajj & Umrah Step-by-Step Guide",
-                    subtitle = "Complete ritual checklist from Ihram to Tawaf, Sa'i, and Arafat",
+                    title = "حج و عمرہ گائیڈ (قدم بہ قدم)",
+                    subtitle = "احرام، طواف، سعی، وقوفِ عرفات اور مناسکِ حج کا مکمل طریقہ",
                     icon = Icons.Default.Mosque,
                     testTag = "explore_item_hajj",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.HAJJ_UMRAH_GUIDE) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Zakat Calculator (حاسبة الزكاة)",
-                    subtitle = "Calculate obligatory 2.5% Zakat on Gold, Silver, Cash & Savings with Nisab",
+                    title = "زکوٰۃ کیلکولیٹر (حاسبة الزكاة)",
+                    subtitle = "سونے، چاندی، نقدی اور مالِ تجارت پر ۲.۵ فیصد زکوٰۃ کا حساب",
                     icon = Icons.Default.Calculate,
                     testTag = "explore_item_zakat",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ZAKAT_CALCULATOR) }
                 )
 
                 ExploreFeatureCard(
-                    title = "Islamic Knowledge & Pillars for Beginners",
-                    subtitle = "5 Pillars of Islam, 6 Articles of Faith, Wudu & Salah step-by-step",
+                    title = "اسلامی معلومات و بنیادی ارکان (علمِ دین)",
+                    subtitle = "اسلام کے ۵ ارکان، ۶ ایمانیات، وضو اور طہارت کے مسائل",
                     icon = Icons.Default.School,
                     testTag = "explore_item_knowledge",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_KNOWLEDGE) }
@@ -859,10 +889,10 @@ fun IslamicCalendarView(viewModel: MainViewModel, modifier: Modifier = Modifier)
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "واپس", tint = Color.White)
                 }
                 Text(
-                    text = "Islamic Calendar (التقويم الهجري)",
+                    text = "اسلامی کیلنڈر (التقويم الهجري)",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -886,16 +916,18 @@ fun IslamicCalendarView(viewModel: MainViewModel, modifier: Modifier = Modifier)
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Current Hijri Date",
+                            text = "آج کی اسلامی و ہجری تاریخ",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = hijriInfo.formatted,
+                            text = hijriInfo.formattedUrdu,
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = hijriInfo.formattedArabic,
                             style = ArabicTextStyle.copy(fontSize = 20.sp),
@@ -908,7 +940,7 @@ fun IslamicCalendarView(viewModel: MainViewModel, modifier: Modifier = Modifier)
             item {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Major Islamic Occasions & Milestones",
+                    text = "اہم اسلامی ایام و تاریخی واقعات",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -928,18 +960,25 @@ fun IslamicCalendarView(viewModel: MainViewModel, modifier: Modifier = Modifier)
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = event.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = event.titleUrdu,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = event.title,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                             ) {
                                 Text(
-                                    text = "${event.hijriDay} ${event.monthName}",
+                                    text = "${event.hijriDay} ${event.monthNameUrdu}",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
@@ -948,10 +987,10 @@ fun IslamicCalendarView(viewModel: MainViewModel, modifier: Modifier = Modifier)
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = event.description,
-                            style = MaterialTheme.typography.bodySmall,
+                            text = event.descriptionUrdu,
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

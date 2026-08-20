@@ -1,12 +1,12 @@
 package com.example.data.model
 
-enum class PrayerName(val displayName: String, val arabicName: String) {
-    FAJR("Fajr", "الفجر"),
-    SUNRISE("Sunrise", "الشروق"),
-    DHUHR("Dhuhr", "الظهر"),
-    ASR("Asr", "العصر"),
-    MAGHRIB("Maghrib", "المغرب"),
-    ISHA("Isha", "العشاء")
+enum class PrayerName(val displayName: String, val arabicName: String, val displayNameUrdu: String) {
+    FAJR("Fajr", "الفجر", "فجر"),
+    SUNRISE("Sunrise", "الشروق", "طلوعِ آفتاب"),
+    DHUHR("Dhuhr", "الظهر", "ظہر"),
+    ASR("Asr", "العصر", "عصر"),
+    MAGHRIB("Maghrib", "المغرب", "مغرب"),
+    ISHA("Isha", "العشاء", "عشاء")
 }
 
 data class PrayerTimeSlot(

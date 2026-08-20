@@ -192,6 +192,43 @@ fun HomeScreen(
                     }
                 )
                 QuickAccessButton(
+                    icon = Icons.Default.Headphones,
+                    label = "نعت و حمد",
+                    testTag = "quick_naat_player",
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAAT_PLAYER)
+                    }
+                )
+                QuickAccessButton(
+                    icon = Icons.Default.AutoAwesome,
+                    label = "۹۹ نام",
+                    testTag = "quick_names_of_allah",
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.NAMES_OF_ALLAH)
+                    }
+                )
+                QuickAccessButton(
+                    icon = Icons.Default.NotificationsActive,
+                    label = "اذان الارم",
+                    testTag = "quick_azan_alarms",
+                    onClick = {
+                        viewModel.setTab(NavigationTab.EXPLORE)
+                        viewModel.setExploreSubScreen(ExploreSubScreen.AZAN_SETTINGS)
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                QuickAccessButton(
                     icon = Icons.Default.AutoStories,
                     label = "قرآن پاک",
                     testTag = "quick_quran",
@@ -215,34 +252,6 @@ fun HomeScreen(
                         viewModel.setExploreSubScreen(ExploreSubScreen.TASBEEH)
                     }
                 )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                QuickAccessButton(
-                    icon = Icons.Default.Favorite,
-                    label = "دعائیں",
-                    testTag = "quick_duas",
-                    onClick = {
-                        viewModel.setTab(NavigationTab.EXPLORE)
-                        viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST)
-                    }
-                )
-                QuickAccessButton(
-                    icon = Icons.Default.MenuBook,
-                    label = "احادیث",
-                    testTag = "quick_hadith",
-                    onClick = {
-                        viewModel.setTab(NavigationTab.EXPLORE)
-                        viewModel.setExploreSubScreen(ExploreSubScreen.HADITH_LIST)
-                    }
-                )
                 QuickAccessButton(
                     icon = Icons.Default.CalendarMonth,
                     label = "تقویم",
@@ -250,15 +259,6 @@ fun HomeScreen(
                     onClick = {
                         viewModel.setTab(NavigationTab.EXPLORE)
                         viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_CALENDAR)
-                    }
-                )
-                QuickAccessButton(
-                    icon = Icons.Default.Calculate,
-                    label = "زکوٰۃ",
-                    testTag = "quick_zakat",
-                    onClick = {
-                        viewModel.setTab(NavigationTab.EXPLORE)
-                        viewModel.setExploreSubScreen(ExploreSubScreen.ZAKAT_CALCULATOR)
                     }
                 )
             }
@@ -275,20 +275,20 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Verse of the Day",
+                    text = "آج کی منتخب آیت",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 TextButton(onClick = { viewModel.setTab(NavigationTab.QURAN) }) {
-                    Text("Read Quran", color = MaterialTheme.colorScheme.primary)
+                    Text("مکمل قرآن", color = MaterialTheme.colorScheme.primary)
                 }
             }
 
             Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                 QuranVerseCard(
                     ayah = featuredAyah,
-                    surahName = "Al-Fatihah",
+                    surahName = "سورۃ الفاتحہ",
                     isPlaying = currentAyahPlaying?.number == featuredAyah.number,
                     isBookmarked = viewModel.isItemBookmarked("ayah_${featuredAyah.number}"),
                     arabicFontSizeSp = arabicFontSize,
@@ -320,7 +320,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Daily Supplication (Dua)",
+                    text = "آج کی مسنون دعا",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -329,7 +329,7 @@ fun HomeScreen(
                     viewModel.setTab(NavigationTab.EXPLORE)
                     viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST)
                 }) {
-                    Text("All Duas", color = MaterialTheme.colorScheme.primary)
+                    Text("تمام دعائیں", color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -364,7 +364,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Hadith of the Day",
+                    text = "آج کی حدیثِ مبارکہ",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -373,7 +373,7 @@ fun HomeScreen(
                     viewModel.setTab(NavigationTab.EXPLORE)
                     viewModel.setExploreSubScreen(ExploreSubScreen.HADITH_LIST)
                 }) {
-                    Text("All Hadiths", color = MaterialTheme.colorScheme.primary)
+                    Text("تمام احادیث", color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -401,7 +401,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Upcoming Islamic Occasions",
+                text = "آنے والے اہم اسلامی ایام و مناسبات",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -439,13 +439,13 @@ fun HomeScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = event.title,
+                                text = event.titleUrdu,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "${event.hijriDay} ${event.monthName} (${event.estimatedDateGregorian})",
+                                text = "${event.hijriDay} ${event.monthNameUrdu} (${event.estimatedDateGregorian})",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )

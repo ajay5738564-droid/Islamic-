@@ -1,6 +1,6 @@
 {
-  "name": "Deenova",
-  "description": "A modern, respectful, all-in-one Islamic mobile application featuring Quran, Prayer Times, Azkar, Hadith, Tasbeeh, Qibla, Ramadan, and Islamic Knowledge.",
+  "name": "Islamic App",
+  "description": "An all-in-one Islamic mobile application featuring 5-time Azan alarms & notifications, complete Quran with Urdu translation, Naat player, 5 daily prayers guide & tracker, Islamic calendar, Qibla compass, Tasbeeh, and Duas.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Deenova"
+rootProject.name = "Islamic App"
 
 include(":app")

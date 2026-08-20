@@ -25,6 +25,8 @@ import com.example.data.model.HadithItem
 import com.example.data.model.HijriDateInfo
 import com.example.data.model.IslamicEvent
 import com.example.data.model.KnowledgeArticle
+import com.example.data.model.NaatCategory
+import com.example.data.model.NaatItem
 import com.example.data.model.PrayerName
 import com.example.data.model.Surah
 import com.example.data.model.TasbeehPreset
@@ -35,6 +37,7 @@ import com.example.data.repository.DuaRepository
 import com.example.data.repository.HadithRepository
 import com.example.data.repository.HijriCalendarRepository
 import com.example.data.repository.IslamicKnowledgeRepository
+import com.example.data.repository.NaatRepository
 import com.example.data.repository.PrayerCalculationRepository
 import com.example.data.repository.QuranRepository
 import com.example.data.repository.TasbeehRepository
@@ -42,6 +45,7 @@ import com.example.data.repository.UserPreferencesRepository
 import com.example.data.repository.ZakatRepository
 import com.example.location.LocationHelper
 import com.example.location.QiblaSensorManager
+import com.example.notification.AzanAlarmScheduler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +71,9 @@ enum class NavigationTab {
 enum class ExploreSubScreen {
     MAIN_MENU,
     NAMAZ_GUIDE,
+    NAAT_PLAYER,
+    NAMES_OF_ALLAH,
+    AZAN_SETTINGS,
     DUA_LIST,
     HADITH_LIST,
     TASBEEH,
@@ -111,11 +118,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _quranSearchQuery = MutableStateFlow("")
     val quranSearchQuery: StateFlow<String> = _quranSearchQuery.asStateFlow()
 
+    // Naat & Hamd Player State
+    private var naatMediaPlayer: MediaPlayer? = null
+    private val _selectedNaatCategory = MutableStateFlow(NaatCategory.ALL)
+    val selectedNaatCategory: StateFlow<NaatCategory> = _selectedNaatCategory.asStateFlow()
+
+    private val _naatSearchQuery = MutableStateFlow("")
+    val naatSearchQuery: StateFlow<String> = _naatSearchQuery.asStateFlow()
+
+    private val _currentPlayingNaat = MutableStateFlow<NaatItem?>(null)
+    val currentPlayingNaat: StateFlow<NaatItem?> = _currentPlayingNaat.asStateFlow()
+
+    private val _selectedNaatForDetails = MutableStateFlow<NaatItem?>(null)
+    val selectedNaatForDetails: StateFlow<NaatItem?> = _selectedNaatForDetails.asStateFlow()
+
+    private val _naatPlaybackState = MutableStateFlow(AudioPlaybackState.IDLE)
+    val naatPlaybackState: StateFlow<AudioPlaybackState> = _naatPlaybackState.asStateFlow()
+
+    private val _naatProgressSeconds = MutableStateFlow(0)
+    val naatProgressSeconds: StateFlow<Int> = _naatProgressSeconds.asStateFlow()
+
+    private val _naatTotalSeconds = MutableStateFlow(1)
+    val naatTotalSeconds: StateFlow<Int> = _naatTotalSeconds.asStateFlow()
+
+    private var naatProgressJob: Job? = null
+
     // Global Search State
     private val _globalSearchQuery = MutableStateFlow("")
     val globalSearchQuery: StateFlow<String> = _globalSearchQuery.asStateFlow()
 
-    // Audio Playback
+    // Quran Audio Playback
     private var mediaPlayer: MediaPlayer? = null
     private val _currentPlayingAyah = MutableStateFlow<Ayah?>(null)
     val currentPlayingAyah: StateFlow<Ayah?> = _currentPlayingAyah.asStateFlow()
@@ -169,6 +201,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val hijriAdjustment = preferences.hijriAdjustmentFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
     val arabicFontSize = preferences.arabicFontSizeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 26)
     val tasbeehVibrate = preferences.tasbeehVibrateFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    // Prayer Alarms
+    val notifyFajr = preferences.notifyFajrFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val notifyDhuhr = preferences.notifyDhuhrFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val notifyAsr = preferences.notifyAsrFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val notifyMaghrib = preferences.notifyMaghribFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val notifyIsha = preferences.notifyIshaFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val azanVoice = preferences.azanVoiceFlow.stateIn(viewModelScope, SharingStarted.Eagerly, "Makkah")
 
     // Daily 5-Prayer Tracker
     val todayDateString: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -448,6 +488,165 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _duaSearchQuery.value = query
     }
 
+    // Naat Player Section Logic
+    fun selectNaatCategory(category: NaatCategory) {
+        _selectedNaatCategory.value = category
+    }
+
+    fun setNaatSearch(query: String) {
+        _naatSearchQuery.value = query
+    }
+
+    fun selectNaatForDetails(item: NaatItem?) {
+        _selectedNaatForDetails.value = item
+    }
+
+    fun playNaat(item: NaatItem) {
+        if (_currentPlayingNaat.value?.id == item.id && _naatPlaybackState.value == AudioPlaybackState.PLAYING) {
+            pauseNaat()
+            return
+        }
+        if (_currentPlayingNaat.value?.id == item.id && _naatPlaybackState.value == AudioPlaybackState.PAUSED) {
+            resumeNaat()
+            return
+        }
+
+        // Stop Quran audio if playing to prevent collision
+        stopAudio()
+
+        try {
+            naatMediaPlayer?.release()
+            naatProgressJob?.cancel()
+            _naatProgressSeconds.value = 0
+            _currentPlayingNaat.value = item
+            _naatPlaybackState.value = AudioPlaybackState.BUFFERING
+
+            naatMediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+                setDataSource(item.audioUrl)
+
+                setOnPreparedListener { mp ->
+                    mp.start()
+                    _naatPlaybackState.value = AudioPlaybackState.PLAYING
+                    _naatTotalSeconds.value = (mp.duration / 1000).coerceAtLeast(1)
+                    startNaatProgressTracker()
+                }
+
+                setOnCompletionListener {
+                    _naatPlaybackState.value = AudioPlaybackState.IDLE
+                    _naatProgressSeconds.value = 0
+                    naatProgressJob?.cancel()
+                }
+
+                setOnErrorListener { _, _, _ ->
+                    _naatPlaybackState.value = AudioPlaybackState.IDLE
+                    naatProgressJob?.cancel()
+                    true
+                }
+
+                prepareAsync()
+            }
+        } catch (e: Exception) {
+            _naatPlaybackState.value = AudioPlaybackState.IDLE
+        }
+    }
+
+    fun pauseNaat() {
+        naatMediaPlayer?.let {
+            if (it.isPlaying) {
+                it.pause()
+                _naatPlaybackState.value = AudioPlaybackState.PAUSED
+            }
+        }
+    }
+
+    fun resumeNaat() {
+        naatMediaPlayer?.let {
+            it.start()
+            _naatPlaybackState.value = AudioPlaybackState.PLAYING
+            startNaatProgressTracker()
+        }
+    }
+
+    fun seekNaat(seconds: Int) {
+        naatMediaPlayer?.let {
+            it.seekTo(seconds * 1000)
+            _naatProgressSeconds.value = seconds
+        }
+    }
+
+    fun stopNaat() {
+        naatProgressJob?.cancel()
+        naatMediaPlayer?.stop()
+        naatMediaPlayer?.release()
+        naatMediaPlayer = null
+        _naatPlaybackState.value = AudioPlaybackState.IDLE
+        _currentPlayingNaat.value = null
+        _naatProgressSeconds.value = 0
+    }
+
+    private fun startNaatProgressTracker() {
+        naatProgressJob?.cancel()
+        naatProgressJob = viewModelScope.launch {
+            while (_naatPlaybackState.value == AudioPlaybackState.PLAYING) {
+                naatMediaPlayer?.let { mp ->
+                    if (mp.isPlaying) {
+                        _naatProgressSeconds.value = mp.currentPosition / 1000
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+
+    // Azan Alarms Logic
+    fun togglePrayerAlarm(prayerName: PrayerName) {
+        viewModelScope.launch {
+            preferences.togglePrayerAlarm(prayerName)
+            syncPrayerAlarms()
+        }
+    }
+
+    fun setAzanVoice(voice: String) {
+        viewModelScope.launch {
+            preferences.setAzanVoice(voice)
+        }
+    }
+
+    fun testAzanAlarm(context: Context, prayerName: PrayerName) {
+        val schedule = _dailyPrayerSchedule.value ?: return
+        val prayer = schedule.prayers.firstOrNull { it.name == prayerName } ?: return
+        val receiver = com.example.notification.AzanNotificationReceiver()
+        val intent = android.content.Intent().apply {
+            putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_PRAYER_NAME, prayerName.displayNameUrdu)
+            putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_PRAYER_TIME, prayer.timeFormatted)
+            putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_CITY_NAME, cityName.value)
+        }
+        receiver.onReceive(context, intent)
+    }
+
+    private fun syncPrayerAlarms() {
+        val schedule = _dailyPrayerSchedule.value ?: return
+        val enabledPrayers = mutableSetOf<PrayerName>()
+        if (notifyFajr.value) enabledPrayers.add(PrayerName.FAJR)
+        if (notifyDhuhr.value) enabledPrayers.add(PrayerName.DHUHR)
+        if (notifyAsr.value) enabledPrayers.add(PrayerName.ASR)
+        if (notifyMaghrib.value) enabledPrayers.add(PrayerName.MAGHRIB)
+        if (notifyIsha.value) enabledPrayers.add(PrayerName.ISHA)
+
+        AzanAlarmScheduler.schedulePrayerAlarms(
+            getApplication(),
+            schedule,
+            cityName.value,
+            enabledPrayers
+        )
+    }
+
     // Knowledge Section Logic
     fun selectKnowledgeArticle(article: KnowledgeArticle?) {
         _selectedKnowledgeArticle.value = article
@@ -474,6 +673,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         _qiblaBearing.value = PrayerCalculationRepository.calculateQiblaDirection(lat, lon)
         _distanceToKaabaKm.value = PrayerCalculationRepository.calculateDistanceToKaabaKm(lat, lon)
+
+        syncPrayerAlarms()
     }
 
     private fun startPeriodicScheduleUpdates() {
