@@ -48,6 +48,9 @@ fun SettingsScreen(
     var showMethodDialog by remember { mutableStateOf(false) }
     var showMadhabDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showAdsDialog by remember { mutableStateOf(false) }
+    var showRewardedConfirmDialog by remember { mutableStateOf(false) }
+    var rewardStatusMessage by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
         modifier = modifier
@@ -296,7 +299,7 @@ fun SettingsScreen(
             )
         }
 
-        // Section: About & Religious Disclaimer
+        // Section: About & Guidelines
         item {
             Spacer(modifier = Modifier.height(14.dp))
             Text(
@@ -305,6 +308,16 @@ fun SettingsScreen(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+            )
+        }
+
+        item {
+            SettingsItemCard(
+                title = "AdMob Integration & Test Ads",
+                subtitle = "Official Test Unit IDs, Reverence Shield & Test Controls",
+                icon = Icons.Default.Campaign,
+                testTag = "setting_ads_item",
+                onClick = { showAdsDialog = true }
             )
         }
 
@@ -419,6 +432,190 @@ fun SettingsScreen(
                 }
             },
             confirmButton = { TextButton(onClick = { showAboutDialog = false }) { Text("Close") } }
+        )
+    }
+
+    // Google AdMob & Test Ads Dialog
+    if (showAdsDialog) {
+        val isRewardedReady by com.example.data.ads.AdManager.isRewardedAvailable.collectAsState()
+        val activity = context as? android.app.Activity
+
+        AlertDialog(
+            onDismissRequest = { showAdsDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Campaign,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Google AdMob Configuration", fontWeight = FontWeight.Bold)
+                }
+            },
+            text = {
+                LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = "Current Environment: Development (Test Mode)",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Using official Google AdMob Test IDs. When deploying to production, set IS_PRODUCTION = true in AdConfig.",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    item {
+                        Text(
+                            text = "Official Test Ad Units:",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "• Banner: ${com.example.data.ads.AdConfig.TEST_BANNER_AD_UNIT_ID}\n" +
+                                    "• Interstitial: ${com.example.data.ads.AdConfig.TEST_INTERSTITIAL_AD_UNIT_ID}\n" +
+                                    "• Rewarded: ${com.example.data.ads.AdConfig.TEST_REWARDED_AD_UNIT_ID}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                    item {
+                        Text(
+                            text = "Islamic Reverence Shield:",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = com.example.ui.theme.EmeraldPrimary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "100% Ad-Free Guarantee: Quran Reading, Quran Audio, Prayer Times, Azan Alarms, Qibla Compass, Tasbeeh Counter, Duas, and Hadith are permanently protected from all ads.",
+                            style = MaterialTheme.typography.bodySmall,
+                            lineHeight = 17.sp
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                    item {
+                        Text(
+                            text = "Test Ad Controls:",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Test Interstitial
+                        OutlinedButton(
+                            onClick = {
+                                if (activity != null) {
+                                    com.example.data.ads.AdManager.showInterstitialIfAppropriate(
+                                        activity = activity,
+                                        contextTag = "settings_test",
+                                        onDismissed = {
+                                            rewardStatusMessage = "Interstitial ad test completed / dismissed."
+                                        }
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().testTag("btn_test_interstitial")
+                        ) {
+                            Icon(Icons.Default.Slideshow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Test Interstitial Ad (Safe Transition)")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Test Rewarded
+                        Button(
+                            onClick = { showRewardedConfirmDialog = true },
+                            modifier = Modifier.fillMaxWidth().testTag("btn_test_rewarded")
+                        ) {
+                            Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Test Rewarded Ad (Optional Support)")
+                        }
+
+                        if (rewardStatusMessage != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = com.example.ui.theme.EmeraldPrimary.copy(alpha = 0.15f))
+                            ) {
+                                Text(
+                                    text = rewardStatusMessage ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = com.example.ui.theme.EmeraldPrimary,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAdsDialog = false }) { Text("Close") }
+            }
+        )
+    }
+
+    // Rewarded Ad Confirmation Dialog
+    if (showRewardedConfirmDialog) {
+        val activity = context as? android.app.Activity
+        AlertDialog(
+            onDismissRequest = { showRewardedConfirmDialog = false },
+            icon = { Icon(Icons.Default.Favorite, contentDescription = null, tint = GoldAccent) },
+            title = { Text("Optional App Support") },
+            text = {
+                Text(
+                    text = "Would you like to watch an optional Google AdMob test video? All core Islamic features (Quran, Prayer, Duas, Hadith) remain 100% free and open.\n\nCompleting this ad will grant the \"App Supporter Badge\".",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRewardedConfirmDialog = false
+                        if (activity != null) {
+                            com.example.data.ads.AdManager.showRewarded(
+                                activity = activity,
+                                onUserEarnedReward = { rewardItem ->
+                                    rewardStatusMessage = "JazakAllahu Khairan! Reward earned: ${rewardItem.amount} ${rewardItem.type} (Community Supporter Badge Activated)."
+                                },
+                                onAdClosed = {
+                                    if (rewardStatusMessage == null) {
+                                        rewardStatusMessage = "Rewarded ad closed."
+                                    }
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Text("Watch Video")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRewardedConfirmDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }

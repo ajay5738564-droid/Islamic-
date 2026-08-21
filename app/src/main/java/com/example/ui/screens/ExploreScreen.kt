@@ -271,10 +271,10 @@ fun ExploreMainMenu(
             }
         }
 
-        // Respectful Non-Intrusive Sponsored Community Notice Banner
+        // Respectful Non-Intrusive AdMob Banner
         item {
             Spacer(modifier = Modifier.height(14.dp))
-            com.example.ui.components.IslamicAdBannerCard(
+            com.example.ui.components.AdMobBannerView(
                 screenContext = "explore_bottom",
                 currentLanguage = viewModel.appLanguage.collectAsState().value
             )
