@@ -351,6 +351,15 @@ fun SettingsScreen(
                 onClick = { showAboutDialog = true }
             )
         }
+
+        // Settings Bottom AdMob Banner
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            com.example.ui.components.AdMobBannerView(
+                screenContext = "settings_bottom",
+                currentLanguage = currentLanguage
+            )
+        }
     }
 
     // Calculation Method Dialog

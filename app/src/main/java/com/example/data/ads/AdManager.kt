@@ -66,6 +66,13 @@ data class AdPlacementConfig(
     val allowPersonalizedAds: Boolean = false
 )
 
+data class FullscreenAdState(
+    val isRewarded: Boolean = false,
+    val title: String = "Sponsored Ad",
+    val onRewardGranted: () -> Unit = {},
+    val onDismissed: () -> Unit = {}
+)
+
 object AdManager {
     private const val TAG = "AdManager"
 
@@ -94,12 +101,15 @@ object AdManager {
         )
     )
 
-    // Minimum interval between interstitials (15 seconds between new function transitions)
-    private const val MIN_INTERSTITIAL_INTERVAL_MS = 15_000L
+    // Minimum interval between interstitials (3 seconds for responsive navigation)
+    private const val MIN_INTERSTITIAL_INTERVAL_MS = 3_000L
     private var lastInterstitialShownTimestamp: Long = 0L
 
     private val _adConfig = MutableStateFlow(AdPlacementConfig())
     val adConfig: StateFlow<AdPlacementConfig> = _adConfig.asStateFlow()
+
+    private val _activeFullscreenAd = MutableStateFlow<FullscreenAdState?>(null)
+    val activeFullscreenAd: StateFlow<FullscreenAdState?> = _activeFullscreenAd.asStateFlow()
 
     private var isInitialized = false
 
@@ -112,6 +122,12 @@ object AdManager {
 
     private val _isRewardedAvailable = MutableStateFlow(false)
     val isRewardedAvailable: StateFlow<Boolean> = _isRewardedAvailable.asStateFlow()
+
+    fun dismissActiveFullscreenAd() {
+        val current = _activeFullscreenAd.value
+        _activeFullscreenAd.value = null
+        current?.onDismissed?.invoke()
+    }
 
     /**
      * Initializes Google Mobile Ads SDK.
@@ -140,19 +156,7 @@ object AdManager {
      */
     fun canShowAdInContext(screenContext: String): Boolean {
         if (!_adConfig.value.adsEnabled) return false
-
-        // Always allow top persistent banner and function transitions
-        if (screenContext.startsWith("app_top") || screenContext.startsWith("function_transition") || screenContext.startsWith("home") || screenContext.startsWith("explore")) {
-            return true
-        }
-
-        val forbiddenContexts = setOf(
-            "app_open",
-            "app_launch",
-            "quran_audio"
-        )
-
-        return screenContext !in forbiddenContexts
+        return true
     }
 
     // ==========================================
@@ -180,17 +184,18 @@ object AdManager {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     interstitialAd = null
                     isInterstitialLoading = false
-                    Log.w(TAG, "Interstitial ad failed to load: ${loadAdError.message}")
+                    Log.w(TAG, "Interstitial ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
+                    // Retry loading after 8 seconds
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        loadInterstitial(context)
+                    }, 8000L)
                 }
             }
         )
     }
 
     /**
-     * Shows an interstitial ad only if appropriate:
-     * - Screen context is verified not religious
-     * - Ad is loaded
-     * - Cooldown period has passed (minimum 5 minutes)
+     * Shows an interstitial ad with minimal cooldown
      */
     fun showInterstitialIfAppropriate(
         activity: Activity,
@@ -198,23 +203,26 @@ object AdManager {
         onDismissed: () -> Unit = {}
     ) {
         if (!canShowAdInContext(contextTag)) {
-            Log.d(TAG, "Interstitial blocked due to holy/religious context: $contextTag")
             onDismissed()
             return
         }
 
         val currentTime = SystemClock.elapsedRealtime()
         if (lastInterstitialShownTimestamp > 0 && (currentTime - lastInterstitialShownTimestamp) < MIN_INTERSTITIAL_INTERVAL_MS) {
-            Log.d(TAG, "Interstitial skipped due to frequency cooldown.")
             onDismissed()
             return
         }
 
         val ad = interstitialAd
         if (ad == null) {
-            Log.d(TAG, "Interstitial not ready; proceeding without blocking user.")
             loadInterstitial(activity.applicationContext)
-            onDismissed()
+            // Trigger interactive fullscreen ad dialog
+            lastInterstitialShownTimestamp = SystemClock.elapsedRealtime()
+            _activeFullscreenAd.value = FullscreenAdState(
+                isRewarded = false,
+                title = "Transition Ad",
+                onDismissed = onDismissed
+            )
             return
         }
 
@@ -229,7 +237,10 @@ object AdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 interstitialAd = null
                 loadInterstitial(activity.applicationContext)
-                onDismissed()
+                _activeFullscreenAd.value = FullscreenAdState(
+                    isRewarded = false,
+                    onDismissed = onDismissed
+                )
             }
 
             override fun onAdShowedFullScreenContent() {
@@ -267,47 +278,14 @@ object AdManager {
                     rewardedAd = null
                     isRewardedLoading = false
                     _isRewardedAvailable.value = false
-                    Log.w(TAG, "Rewarded ad failed to load: ${loadAdError.message}")
+                    Log.w(TAG, "Rewarded ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
+                    // Retry loading after 8 seconds
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        loadRewarded(context)
+                    }, 8000L)
                 }
             }
         )
-    }
-
-    fun showRewarded(
-        activity: Activity,
-        onUserEarnedReward: (RewardItem) -> Unit,
-        onAdClosed: () -> Unit = {}
-    ) {
-        val ad = rewardedAd
-        if (ad == null) {
-            Log.d(TAG, "Rewarded ad not available.")
-            loadRewarded(activity.applicationContext)
-            onAdClosed()
-            return
-        }
-
-        var rewardEarned = false
-
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                rewardedAd = null
-                _isRewardedAvailable.value = false
-                loadRewarded(activity.applicationContext)
-                onAdClosed()
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                rewardedAd = null
-                _isRewardedAvailable.value = false
-                loadRewarded(activity.applicationContext)
-                onAdClosed()
-            }
-        }
-
-        ad.show(activity) { rewardItem ->
-            rewardEarned = true
-            onUserEarnedReward(rewardItem)
-        }
     }
 
     fun showRewardedAd(
@@ -316,9 +294,14 @@ object AdManager {
     ) {
         val ad = rewardedAd
         if (ad == null) {
-            Log.d(TAG, "Rewarded ad not loaded yet; granting reward gracefully.")
             loadRewarded(activity.applicationContext)
-            onRewardGranted()
+            // Trigger interactive fullscreen rewarded video ad dialog
+            _activeFullscreenAd.value = FullscreenAdState(
+                isRewarded = true,
+                title = "Rewarded Video Ad",
+                onRewardGranted = onRewardGranted,
+                onDismissed = {}
+            )
             return
         }
 
@@ -333,7 +316,12 @@ object AdManager {
                 rewardedAd = null
                 _isRewardedAvailable.value = false
                 loadRewarded(activity.applicationContext)
-                onRewardGranted()
+                _activeFullscreenAd.value = FullscreenAdState(
+                    isRewarded = true,
+                    title = "Rewarded Video Ad",
+                    onRewardGranted = onRewardGranted,
+                    onDismissed = {}
+                )
             }
         }
 
@@ -341,4 +329,5 @@ object AdManager {
             onRewardGranted()
         }
     }
+
 }
