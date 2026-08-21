@@ -14,7 +14,7 @@ object NaatRepository {
             artistEnglish = "Qari Waheed Zafar Qasmi",
             category = NaatCategory.NAAT,
             duration = "06:45",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/faslon_ko_takalluf.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/001.mp3",
             lyricsUrdu = listOf(
                 "فاصلوں کو تکلّف ہے ہم سے اگر، ہم بھی بے بس نہیں ہیں، بے کس نہیں",
                 "ان کو پہنچیں گے ہم بھی دعا کے لیے، اپنے دل کو مدینہ بنا لیں گے ہم",
@@ -34,7 +34,7 @@ object NaatRepository {
             artistEnglish = "Ala Hazrat Imam Ahmad Raza Khan",
             category = NaatCategory.SALAM,
             duration = "08:12",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/mustafa_jane_rahmat.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/036.mp3",
             lyricsUrdu = listOf(
                 "مصطفیٰ جانِ رحمت پہ لاکھوں سلام",
                 "شمعِ بزمِ ہدایت پہ لاکھوں سلام",
@@ -58,7 +58,7 @@ object NaatRepository {
             artistEnglish = "Muzaffar Warsi",
             category = NaatCategory.HAMD,
             duration = "07:30",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/koi_to_hai.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/055.mp3",
             lyricsUrdu = listOf(
                 "کوئی تو ہے جو نظامِ ہستی چلا رہا ہے، وہی خدا ہے",
                 "دکھائی بھی جو نہ دے نظر بھی جو آ رہا ہے، وہی خدا ہے",
@@ -80,7 +80,7 @@ object NaatRepository {
             artistEnglish = "Sabri Brothers / Atif Aslam",
             category = NaatCategory.NAAT,
             duration = "09:40",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/tajdar_e_haram.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/067.mp3",
             lyricsUrdu = listOf(
                 "قسمت میں میری چین سے جینا لکھ دے",
                 "ڈوبے نہ کبھی میرا سفینہ لکھ دے",
@@ -105,7 +105,7 @@ object NaatRepository {
             artistEnglish = "Junaid Jamshed",
             category = NaatCategory.NAAT,
             duration = "05:15",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/woh_mera_nabi_hai.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/112.mp3",
             lyricsUrdu = listOf(
                 "جس نے دنیا سنواری، وہ میرا نبی ہے",
                 "جس کی سیرت ہے پیاری، وہ میرا نبی ہے",
@@ -129,7 +129,7 @@ object NaatRepository {
             artistEnglish = "Maher Zain",
             category = NaatCategory.SALAM,
             duration = "04:55",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/ya_nabi_salam_alayka.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/113.mp3",
             lyricsUrdu = listOf(
                 "أنت نور الله فجراً، جئت بعد العسر يسراً",
                 "ربنا أعلاك قدراً، يا إمام الأنبياء",
@@ -151,7 +151,7 @@ object NaatRepository {
             artistEnglish = "Qari Waheed Zafar Qasmi",
             category = NaatCategory.MANQABAT,
             duration = "06:10",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/karam_mangta_hoon.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/114.mp3",
             lyricsUrdu = listOf(
                 "الٰہی میں تجھ سے دعا مانگتا ہوں",
                 "کرم مانگتا ہوں، عطا مانگتا ہوں",
@@ -173,7 +173,7 @@ object NaatRepository {
             artistEnglish = "Owais Raza Qadri",
             category = NaatCategory.NAAT,
             duration = "07:20",
-            audioUrl = "https://cdn.islamicfinder.org/audio/naats/main_madine_chala.mp3",
+            audioUrl = "https://server8.mp3quran.net/afs/108.mp3",
             lyricsUrdu = listOf(
                 "شہرِ نبی کی رونقیں کیا خوب ہیں",
                 "ہر دل کے وہ تو پیارے محبوب ہیں",

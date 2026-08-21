@@ -86,6 +86,19 @@ fun ExploreMainMenu(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? android.app.Activity
+
+    fun navigateWithAd(screen: ExploreSubScreen) {
+        if (activity != null) {
+            com.example.data.ads.AdManager.showInterstitialIfAppropriate(
+                activity = activity,
+                contextTag = "explore_${screen.name.lowercase()}"
+            )
+        }
+        viewModel.setExploreSubScreen(screen)
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -141,7 +154,7 @@ fun ExploreMainMenu(
                     subtitle = "مشہور نعتیں، حمدِ باری تعالیٰ، درود و سلام مع مکمل اشعار اور پلئیر",
                     icon = Icons.Default.Headphones,
                     testTag = "explore_item_naat_player",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAAT_PLAYER) }
+                    onClick = { navigateWithAd(ExploreSubScreen.NAAT_PLAYER) }
                 )
 
                 // 99 Names of Allah Card
@@ -150,7 +163,7 @@ fun ExploreMainMenu(
                     subtitle = "اللہ تعالیٰ کے صفاتی نام مع اردو معانی، انگریزی تلفظ اور فضائل و برکات",
                     icon = Icons.Default.AutoAwesome,
                     testTag = "explore_item_names_of_allah",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAMES_OF_ALLAH) }
+                    onClick = { navigateWithAd(ExploreSubScreen.NAMES_OF_ALLAH) }
                 )
 
                 // Azan & Alarm Settings Card
@@ -159,7 +172,7 @@ fun ExploreMainMenu(
                     subtitle = "۵ وقت کی اذان الرٹس، مکہ و مدینہ کی اذان کی آوازیں اور ٹیسٹ الارم",
                     icon = Icons.Default.NotificationsActive,
                     testTag = "explore_item_azan_settings",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.AZAN_SETTINGS) }
+                    onClick = { navigateWithAd(ExploreSubScreen.AZAN_SETTINGS) }
                 )
 
                 // Top Prominent 5 Times Namaz Card
@@ -168,7 +181,7 @@ fun ExploreMainMenu(
                     subtitle = "فجر، ظہر، عصر، مغرب اور عشاء کی رکعتیں، دعائیں اور مکمل طریقہ",
                     icon = Icons.Default.Mosque,
                     testTag = "explore_item_namaz_guide",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAMAZ_GUIDE) }
+                    onClick = { navigateWithAd(ExploreSubScreen.NAMAZ_GUIDE) }
                 )
 
                 ExploreFeatureCard(
@@ -176,7 +189,7 @@ fun ExploreMainMenu(
                     subtitle = "حصن المسلم سے روزمرہ زندگی کی مستند دعائیں اور فضائل",
                     icon = Icons.Default.Favorite,
                     testTag = "explore_item_duas",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.DUA_LIST) }
+                    onClick = { navigateWithAd(ExploreSubScreen.DUA_LIST) }
                 )
 
                 ExploreFeatureCard(
@@ -184,7 +197,7 @@ fun ExploreMainMenu(
                     subtitle = "اربعین نووی اور صحیح بخاری کی منتخب صحیح احادیث",
                     icon = Icons.Default.MenuBook,
                     testTag = "explore_item_hadith",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.HADITH_LIST) }
+                    onClick = { navigateWithAd(ExploreSubScreen.HADITH_LIST) }
                 )
 
                 ExploreFeatureCard(
@@ -192,7 +205,7 @@ fun ExploreMainMenu(
                     subtitle = "تسبیحاتِ فاطمی، وائبریشن اور روزانہ اذکار کا مکمل ریکارڈ",
                     icon = Icons.Default.FilterVintage,
                     testTag = "explore_item_tasbeeh",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.TASBEEH) }
+                    onClick = { navigateWithAd(ExploreSubScreen.TASBEEH) }
                 )
 
                 ExploreFeatureCard(
@@ -200,7 +213,7 @@ fun ExploreMainMenu(
                     subtitle = "سینسرز کے ذریعے خانہ کعبہ (مکہ مکرمہ) کی سمت کی درست رہنمائی",
                     icon = Icons.Default.CompassCalibration,
                     testTag = "explore_item_qibla",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.QIBLA) }
+                    onClick = { navigateWithAd(ExploreSubScreen.QIBLA) }
                 )
             }
         }
@@ -226,7 +239,7 @@ fun ExploreMainMenu(
                     subtitle = "قمری مہینے، ہجری تاریخ اور اہم اسلامی تاریخی واقعات",
                     icon = Icons.Default.CalendarMonth,
                     testTag = "explore_item_calendar",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_CALENDAR) }
+                    onClick = { navigateWithAd(ExploreSubScreen.ISLAMIC_CALENDAR) }
                 )
 
                 ExploreFeatureCard(
@@ -234,7 +247,7 @@ fun ExploreMainMenu(
                     subtitle = "سحر و افطار، روزے کی دعائیں، تراویح اور شبِ قدر کے اعمال",
                     icon = Icons.Default.Nightlight,
                     testTag = "explore_item_ramadan",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.RAMADAN_DASHBOARD) }
+                    onClick = { navigateWithAd(ExploreSubScreen.RAMADAN_DASHBOARD) }
                 )
 
                 ExploreFeatureCard(
@@ -242,7 +255,7 @@ fun ExploreMainMenu(
                     subtitle = "احرام، طواف، سعی، وقوفِ عرفات اور مناسکِ حج کا مکمل طریقہ",
                     icon = Icons.Default.Mosque,
                     testTag = "explore_item_hajj",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.HAJJ_UMRAH_GUIDE) }
+                    onClick = { navigateWithAd(ExploreSubScreen.HAJJ_UMRAH_GUIDE) }
                 )
 
                 ExploreFeatureCard(
@@ -250,7 +263,7 @@ fun ExploreMainMenu(
                     subtitle = "سونے، چاندی، نقدی اور مالِ تجارت پر ۲.۵ فیصد زکوٰۃ کا حساب",
                     icon = Icons.Default.Calculate,
                     testTag = "explore_item_zakat",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ZAKAT_CALCULATOR) }
+                    onClick = { navigateWithAd(ExploreSubScreen.ZAKAT_CALCULATOR) }
                 )
 
                 ExploreFeatureCard(
@@ -258,7 +271,7 @@ fun ExploreMainMenu(
                     subtitle = "اسلام کے ۵ ارکان، ۶ ایمانیات، وضو اور طہارت کے مسائل",
                     icon = Icons.Default.School,
                     testTag = "explore_item_knowledge",
-                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.ISLAMIC_KNOWLEDGE) }
+                    onClick = { navigateWithAd(ExploreSubScreen.ISLAMIC_KNOWLEDGE) }
                 )
 
                 ExploreFeatureCard(

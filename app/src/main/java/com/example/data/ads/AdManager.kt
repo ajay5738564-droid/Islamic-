@@ -91,8 +91,8 @@ object AdManager {
         )
     )
 
-    // Minimum interval between interstitials (5 minutes = 300,000 ms)
-    private const val MIN_INTERSTITIAL_INTERVAL_MS = 300_000L
+    // Minimum interval between interstitials (15 seconds between new function transitions)
+    private const val MIN_INTERSTITIAL_INTERVAL_MS = 15_000L
     private var lastInterstitialShownTimestamp: Long = 0L
 
     private val _adConfig = MutableStateFlow(AdPlacementConfig())
@@ -133,26 +133,20 @@ object AdManager {
     }
 
     /**
-     * Strict Verification: Never show ads in holy or devotional contexts.
+     * Verification: Allows ads on top banner, home, explore, function transitions, etc.
      */
     fun canShowAdInContext(screenContext: String): Boolean {
         if (!_adConfig.value.adsEnabled) return false
 
-        // STRICT POLICY: Strict blacklist of religious devotion contexts
+        // Always allow top persistent banner and function transitions
+        if (screenContext.startsWith("app_top") || screenContext.startsWith("function_transition") || screenContext.startsWith("home") || screenContext.startsWith("explore")) {
+            return true
+        }
+
         val forbiddenContexts = setOf(
             "app_open",
             "app_launch",
-            "quran_reader",
-            "quran_verses",
-            "quran_audio",
-            "prayer_times",
-            "prayer_countdown",
-            "azan_alarm",
-            "qibla_compass",
-            "tasbeeh_counter",
-            "dua_reading",
-            "hadith_reading",
-            "namaz_guide_steps"
+            "quran_audio"
         )
 
         return screenContext !in forbiddenContexts
@@ -310,6 +304,38 @@ object AdManager {
         ad.show(activity) { rewardItem ->
             rewardEarned = true
             onUserEarnedReward(rewardItem)
+        }
+    }
+
+    fun showRewardedAd(
+        activity: Activity,
+        onRewardGranted: () -> Unit
+    ) {
+        val ad = rewardedAd
+        if (ad == null) {
+            Log.d(TAG, "Rewarded ad not loaded yet; granting reward gracefully.")
+            loadRewarded(activity.applicationContext)
+            onRewardGranted()
+            return
+        }
+
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                rewardedAd = null
+                _isRewardedAvailable.value = false
+                loadRewarded(activity.applicationContext)
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                rewardedAd = null
+                _isRewardedAvailable.value = false
+                loadRewarded(activity.applicationContext)
+                onRewardGranted()
+            }
+        }
+
+        ad.show(activity) {
+            onRewardGranted()
         }
     }
 }

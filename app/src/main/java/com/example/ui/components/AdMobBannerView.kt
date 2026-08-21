@@ -51,13 +51,15 @@ fun AdMobBannerView(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .testTag("admob_banner_$screenContext"),
         contentAlignment = Alignment.Center
     ) {
-        if (!isPreview && !adFailedToLoad) {
+        if (!isPreview) {
             AndroidView(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 factory = { context: Context ->
                     AdView(context).apply {
                         setAdSize(AdSize.BANNER)
@@ -79,19 +81,21 @@ fun AdMobBannerView(
             )
         }
 
-        // Fallback display if ad is loading, in preview, or failed to load cleanly
-        if (adFailedToLoad || !isAdLoaded) {
+        // Clean notice if ad is loading, in preview, or failed to load
+        if (adFailedToLoad || isPreview) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                 )
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -102,34 +106,30 @@ fun AdMobBannerView(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(GoldAccent.copy(alpha = 0.2f))
+                                .background(GoldAccent.copy(alpha = 0.3f))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = when (currentLanguage) {
-                                    AppLanguage.URDU -> "اشتہار (Ad)"
-                                    AppLanguage.HINDI -> "प्रायोजित (Ad)"
-                                    AppLanguage.ARABIC -> "إعلان"
-                                    else -> "AdMob Test Banner"
-                                },
+                                text = "AdMob Ad",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
 
                         Text(
-                            text = "Islamic App Partner Community Notice",
+                            text = "AdMob Test Banner (Running)",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
                         )
                     }
 
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         modifier = Modifier.size(16.dp)
                     )
                 }

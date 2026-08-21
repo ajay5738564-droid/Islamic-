@@ -7,9 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -112,74 +110,95 @@ fun DeenovaApp(
         }
     }
 
+    val activity = context as? Activity
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
             DeenovaBottomNavigation(
                 selectedTab = currentTab,
                 currentLanguage = currentLanguage,
-                onTabSelected = { tab -> viewModel.setTab(tab) }
+                onTabSelected = { tab ->
+                    if (tab != currentTab && activity != null) {
+                        com.example.data.ads.AdManager.showInterstitialIfAppropriate(
+                            activity = activity,
+                            contextTag = "tab_${tab.name.lowercase()}"
+                        )
+                    }
+                    viewModel.setTab(tab)
+                }
             )
         }
     ) { innerPadding ->
-        Box(
+        androidx.compose.foundation.layout.Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Main Screen Content
-            when (currentTab) {
-                NavigationTab.HOME -> {
-                    HomeScreen(
-                        viewModel = viewModel,
-                        onOpenLocationPicker = { showLocationPicker = true },
-                        onOpenGlobalSearch = { showGlobalSearch = true },
-                        onOpenBookmarks = { showBookmarks = true },
-                        onOpenLanguagePicker = { showLanguageDialog = true }
-                    )
-                }
-                NavigationTab.QURAN -> {
-                    QuranScreen(
-                        viewModel = viewModel
-                    )
-                }
-                NavigationTab.PRAYER -> {
-                    PrayerScreen(
-                        viewModel = viewModel,
-                        onOpenLocationPicker = { showLocationPicker = true }
-                    )
-                }
-                NavigationTab.EXPLORE -> {
-                    ExploreScreen(
-                        viewModel = viewModel
-                    )
-                }
-                NavigationTab.MORE -> {
-                    SettingsScreen(
-                        viewModel = viewModel,
-                        onOpenLocationPicker = { showLocationPicker = true },
-                        onOpenBookmarks = { showBookmarks = true },
-                        onOpenLanguagePicker = { showLanguageDialog = true }
-                    )
-                }
-            }
+            // Upper side persistent AdMob banner - always active
+            com.example.ui.components.AdMobBannerView(
+                screenContext = "app_top_persistent",
+                currentLanguage = currentLanguage
+            )
 
-            // Floating Mini Audio Player when recitation is active
-            if (playingAyah != null) {
-                AudioMiniPlayerBar(
-                    currentAyah = playingAyah,
-                    surahName = selectedSurah?.nameEnglish ?: "Surah Al-Fatihah",
-                    playbackState = playbackState,
-                    onPlayPauseClick = {
-                        if (playingAyah != null) {
-                            viewModel.playAyahAudio(playingAyah!!)
-                        }
-                    },
-                    onCloseClick = { viewModel.stopAudio() },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 12.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                // Main Screen Content
+                when (currentTab) {
+                    NavigationTab.HOME -> {
+                        HomeScreen(
+                            viewModel = viewModel,
+                            onOpenLocationPicker = { showLocationPicker = true },
+                            onOpenGlobalSearch = { showGlobalSearch = true },
+                            onOpenBookmarks = { showBookmarks = true }
+                        )
+                    }
+                    NavigationTab.QURAN -> {
+                        QuranScreen(
+                            viewModel = viewModel
+                        )
+                    }
+                    NavigationTab.PRAYER -> {
+                        PrayerScreen(
+                            viewModel = viewModel,
+                            onOpenLocationPicker = { showLocationPicker = true }
+                        )
+                    }
+                    NavigationTab.EXPLORE -> {
+                        ExploreScreen(
+                            viewModel = viewModel
+                        )
+                    }
+                    NavigationTab.MORE -> {
+                        SettingsScreen(
+                            viewModel = viewModel,
+                            onOpenLocationPicker = { showLocationPicker = true },
+                            onOpenBookmarks = { showBookmarks = true },
+                            onOpenLanguagePicker = { showLanguageDialog = true }
+                        )
+                    }
+                }
+
+                // Floating Mini Audio Player when recitation is active
+                if (playingAyah != null) {
+                    AudioMiniPlayerBar(
+                        currentAyah = playingAyah,
+                        surahName = selectedSurah?.nameEnglish ?: "Surah Al-Fatihah",
+                        playbackState = playbackState,
+                        onPlayPauseClick = {
+                            if (playingAyah != null) {
+                                viewModel.playAyahAudio(playingAyah!!)
+                            }
+                        },
+                        onCloseClick = { viewModel.stopAudio() },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp)
+                    )
+                }
             }
         }
     }
