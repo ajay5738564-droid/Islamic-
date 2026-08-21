@@ -26,10 +26,17 @@ enum class AppLanguage(val code: String, val displayName: String, val nativeName
     ARABIC("ar", "Arabic", "العربية")
 }
 
+enum class ThemeMode(val titleUrdu: String, val titleHindi: String, val titleEnglish: String) {
+    SYSTEM("سسٹم ڈیفالٹ (خودکار)", "सिस्टम डिफ़ॉल्ट (ऑटो)", "System Default (Auto)"),
+    LIGHT("روشن تھیم (Light Mode)", "लाइट मोड (Light)", "Light Mode"),
+    DARK("تاریک تھیم (Dark Mode)", "डार्क मोड (Dark)", "Dark Mode")
+}
+
 class UserPreferencesRepository(private val context: Context) {
 
     private object PreferencesKeys {
         val LANGUAGE = stringPreferencesKey("app_language")
+        val THEME_MODE = stringPreferencesKey("app_theme_mode")
         val CALCULATION_METHOD = stringPreferencesKey("prayer_method")
         val ASR_MADHAB = stringPreferencesKey("asr_madhab")
         val SELECTED_CITY = stringPreferencesKey("selected_city")
@@ -147,6 +154,19 @@ class UserPreferencesRepository(private val context: Context) {
 
     val notifyDailyDuaFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[PreferencesKeys.NOTIFY_DAILY_DUA] ?: true
+    }
+
+    val themeModeFlow: Flow<ThemeMode> = context.dataStore.data.map { prefs ->
+        val modeStr = prefs[PreferencesKeys.THEME_MODE] ?: ThemeMode.SYSTEM.name
+        try {
+            ThemeMode.valueOf(modeStr)
+        } catch (e: Exception) {
+            ThemeMode.SYSTEM
+        }
+    }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        context.dataStore.edit { it[PreferencesKeys.THEME_MODE] = mode.name }
     }
 
     suspend fun setLanguage(language: AppLanguage) {

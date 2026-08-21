@@ -37,6 +37,7 @@ fun SettingsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val currentLanguage by viewModel.appLanguage.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
     val calculationMethod by viewModel.prayerMethod.collectAsState()
     val asrMadhab by viewModel.asrMadhab.collectAsState()
     val cityName by viewModel.cityName.collectAsState()
@@ -47,6 +48,7 @@ fun SettingsScreen(
 
     var showMethodDialog by remember { mutableStateOf(false) }
     var showMadhabDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -152,9 +154,9 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = when (currentLanguage) {
-                    AppLanguage.URDU -> "زبان اور قرآنی رسم الخط"
-                    AppLanguage.HINDI -> "भाषा व लिपि सेटिंग्स"
-                    else -> "Language & Typography"
+                    AppLanguage.URDU -> "زبان اور ظاہری وضع (Theme & Language)"
+                    AppLanguage.HINDI -> "भाषा व थीम सेटिंग्स"
+                    else -> "Language & Appearance"
                 },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
@@ -166,14 +168,48 @@ fun SettingsScreen(
         item {
             SettingsItemCard(
                 title = when (currentLanguage) {
-                    AppLanguage.URDU -> "ایپ کی زبان تبدیل کریں (Language)"
-                    AppLanguage.HINDI -> "ऐप की भाषा बदलें (Language)"
-                    else -> "Change Application Language"
+                    AppLanguage.URDU -> "ایپ کی زبان (Application Language)"
+                    AppLanguage.HINDI -> "ऐप की भाषा (Language)"
+                    else -> "Application Language"
                 },
                 subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName}) - اردو • हिन्दी • English",
                 icon = Icons.Default.Language,
                 testTag = "setting_language_item",
                 onClick = onOpenLanguagePicker
+            )
+        }
+
+        item {
+            SettingsItemCard(
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "ڈارک موڈ / لائٹ موڈ (Theme Mode)"
+                    AppLanguage.HINDI -> "डार्क मोड / लाइट मोड (Theme)"
+                    else -> "Theme Mode (Dark / Light Mode)"
+                },
+                subtitle = when (themeMode) {
+                    com.example.data.repository.ThemeMode.SYSTEM -> when (currentLanguage) {
+                        AppLanguage.URDU -> "سسٹم ڈیفالٹ (خودکار)"
+                        AppLanguage.HINDI -> "सिस्टम डिफ़ॉल्ट (ऑटो)"
+                        else -> "System Default (Auto)"
+                    }
+                    com.example.data.repository.ThemeMode.LIGHT -> when (currentLanguage) {
+                        AppLanguage.URDU -> "روشن تھیم (Light Mode)"
+                        AppLanguage.HINDI -> "लाइट मोड (Light)"
+                        else -> "Light Mode"
+                    }
+                    com.example.data.repository.ThemeMode.DARK -> when (currentLanguage) {
+                        AppLanguage.URDU -> "تاریک تھیم (Dark Mode)"
+                        AppLanguage.HINDI -> "डार्क मोड (Dark)"
+                        else -> "Dark Mode"
+                    }
+                },
+                icon = when (themeMode) {
+                    com.example.data.repository.ThemeMode.DARK -> Icons.Default.DarkMode
+                    com.example.data.repository.ThemeMode.LIGHT -> Icons.Default.LightMode
+                    com.example.data.repository.ThemeMode.SYSTEM -> Icons.Default.BrightnessAuto
+                },
+                testTag = "setting_theme_mode_item",
+                onClick = { showThemeDialog = true }
             )
         }
 
@@ -264,21 +300,6 @@ fun SettingsScreen(
                     )
                 }
             }
-        }
-
-        item {
-            SettingsItemCard(
-                title = when (currentLanguage) {
-                    AppLanguage.URDU -> "زبان تبدیل کریں"
-                    AppLanguage.HINDI -> "भाषा बदलें"
-                    AppLanguage.ARABIC -> "تغيير اللغة"
-                    else -> "Application Language"
-                },
-                subtitle = "${currentLanguage.displayName} (${currentLanguage.nativeName})",
-                icon = Icons.Default.Language,
-                testTag = "setting_language_item",
-                onClick = onOpenLanguagePicker
-            )
         }
 
         item {
@@ -390,6 +411,76 @@ fun SettingsScreen(
                 }
             },
             confirmButton = { TextButton(onClick = { showMadhabDialog = false }) { Text("Cancel") } }
+        )
+    }
+
+    // Theme Selection Dialog (Dark / Light Mode)
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = {
+                Text(
+                    when (currentLanguage) {
+                        AppLanguage.URDU -> "تھیم کا انتخاب کریں (Appearance)"
+                        AppLanguage.HINDI -> "थीम चुनें (Appearance)"
+                        else -> "Select Theme Mode"
+                    }
+                )
+            },
+            text = {
+                Column {
+                    com.example.data.repository.ThemeMode.values().forEach { mode ->
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = when (currentLanguage) {
+                                        AppLanguage.URDU -> mode.titleUrdu
+                                        AppLanguage.HINDI -> mode.titleHindi
+                                        else -> mode.titleEnglish
+                                    },
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = when (mode) {
+                                        com.example.data.repository.ThemeMode.DARK -> Icons.Default.DarkMode
+                                        com.example.data.repository.ThemeMode.LIGHT -> Icons.Default.LightMode
+                                        com.example.data.repository.ThemeMode.SYSTEM -> Icons.Default.BrightnessAuto
+                                    },
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            trailingContent = {
+                                if (themeMode == mode) {
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            },
+                            modifier = Modifier.clickable {
+                                viewModel.setThemeMode(mode)
+                                showThemeDialog = false
+                            }
+                        )
+                        HorizontalDivider()
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showThemeDialog = false }) {
+                    Text(
+                        when (currentLanguage) {
+                            AppLanguage.URDU -> "منسوخ کریں"
+                            AppLanguage.HINDI -> "रद्द करें"
+                            else -> "Cancel"
+                        }
+                    )
+                }
+            }
         )
     }
 

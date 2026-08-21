@@ -21,18 +21,21 @@ import kotlinx.coroutines.flow.asStateFlow
  * full separation between Development (Official Google Test IDs) and Production IDs.
  */
 object AdConfig {
-    // Toggle when releasing to production with real AdMob account
-    const val IS_PRODUCTION = false
+    // Enabled real production AdMob account
+    const val IS_PRODUCTION = true
 
-    // Official Google AdMob TEST Ad Unit IDs
+    // Real AdMob App ID: ca-app-pub-6680282505070613~8973172694
+    const val ADMOB_APP_ID = "ca-app-pub-6680282505070613~8973172694"
+
+    // Real Production AdMob Ad Unit IDs
+    const val PROD_BANNER_AD_UNIT_ID = "ca-app-pub-6680282505070613/5489378788"
+    const val PROD_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6680282505070613/2407764342"
+    const val PROD_REWARDED_AD_UNIT_ID = "ca-app-pub-6680282505070613/9220740239"
+
+    // Official Google AdMob TEST Ad Unit IDs (for development fallback)
     const val TEST_BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
     const val TEST_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
     const val TEST_REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
-
-    // Production Placeholders (Configure in production environment)
-    const val PROD_BANNER_AD_UNIT_ID = "YOUR_REAL_BANNER_AD_UNIT_ID"
-    const val PROD_INTERSTITIAL_AD_UNIT_ID = "YOUR_REAL_INTERSTITIAL_AD_UNIT_ID"
-    const val PROD_REWARDED_AD_UNIT_ID = "YOUR_REAL_REWARDED_AD_UNIT_ID"
 
     val BANNER_AD_UNIT_ID: String
         get() = if (IS_PRODUCTION) PROD_BANNER_AD_UNIT_ID else TEST_BANNER_AD_UNIT_ID

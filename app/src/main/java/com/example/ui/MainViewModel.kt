@@ -33,6 +33,7 @@ import com.example.data.model.TasbeehPreset
 import com.example.data.model.ZakatCalculationResult
 import com.example.data.model.ZakatInput
 import com.example.data.repository.AppLanguage
+import com.example.data.repository.ThemeMode
 import com.example.data.repository.DuaRepository
 import com.example.data.repository.HadithRepository
 import com.example.data.repository.HijriCalendarRepository
@@ -202,6 +203,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val hijriAdjustment = preferences.hijriAdjustmentFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
     val arabicFontSize = preferences.arabicFontSizeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 26)
     val tasbeehVibrate = preferences.tasbeehVibrateFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val themeMode = preferences.themeModeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
 
     // Prayer Alarms
     val notifyFajr = preferences.notifyFajrFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -243,6 +245,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setLanguage(language: AppLanguage) {
         viewModelScope.launch {
             preferences.setLanguage(language)
+        }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch {
+            preferences.setThemeMode(mode)
+            triggerHapticFeedback()
         }
     }
 

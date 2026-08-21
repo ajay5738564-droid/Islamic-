@@ -42,7 +42,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         com.example.data.ads.AdManager.initializeAds(this)
         setContent {
-            MyApplicationTheme {
+            val themeMode by viewModel.themeMode.collectAsState()
+            val isDarkTheme = when (themeMode) {
+                com.example.data.repository.ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+                com.example.data.repository.ThemeMode.LIGHT -> false
+                com.example.data.repository.ThemeMode.DARK -> true
+            }
+
+            MyApplicationTheme(darkTheme = isDarkTheme) {
                 DeenovaApp(viewModel = viewModel)
             }
         }
