@@ -70,7 +70,6 @@ fun DeenovaApp(
     val selectedKnowledgeArticle by viewModel.selectedKnowledgeArticle.collectAsState()
     val selectedNaatForDetails by viewModel.selectedNaatForDetails.collectAsState()
     val currentLanguage by viewModel.appLanguage.collectAsState()
-    val activeFullscreenAd by com.example.data.ads.AdManager.activeFullscreenAd.collectAsState()
 
     var showLocationPicker by remember { mutableStateOf(false) }
     var showGlobalSearch by remember { mutableStateOf(false) }
@@ -248,15 +247,6 @@ fun DeenovaApp(
         BookmarksDialog(
             viewModel = viewModel,
             onDismiss = { showBookmarks = false }
-        )
-    }
-
-    activeFullscreenAd?.let { adState ->
-        com.example.ui.components.AdMobFullScreenDialog(
-            adState = adState,
-            onDismiss = {
-                com.example.data.ads.AdManager.dismissActiveFullscreenAd()
-            }
         )
     }
 }

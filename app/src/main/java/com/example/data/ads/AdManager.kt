@@ -4,10 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
-import com.google.android.gms.ads.*
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,101 +18,34 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Islamic App AdMob Architecture
- *
- * Implements strict reverence policies, respectful frequency caps, and
- * full separation between Development (Official Google Test IDs) and Production IDs.
+ * AdMob Configuration using REAL AdMob IDs exclusively.
  */
 object AdConfig {
-    // Enabled real production AdMob account
-    const val IS_PRODUCTION = true
-
-    // Real AdMob App ID: ca-app-pub-6680282505070613~8973172694
+    // Real AdMob App ID
     const val ADMOB_APP_ID = "ca-app-pub-6680282505070613~8973172694"
 
-    // Real Production AdMob Ad Unit IDs
-    const val PROD_BANNER_AD_UNIT_ID = "ca-app-pub-6680282505070613/5489378788"
-    const val PROD_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6680282505070613/2407764342"
-    const val PROD_REWARDED_AD_UNIT_ID = "ca-app-pub-6680282505070613/9220740239"
-
-    // Official Google AdMob TEST Ad Unit IDs (for development fallback)
-    const val TEST_BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
-    const val TEST_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
-    const val TEST_REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
-
-    val BANNER_AD_UNIT_ID: String
-        get() = if (IS_PRODUCTION) PROD_BANNER_AD_UNIT_ID else TEST_BANNER_AD_UNIT_ID
-
-    val INTERSTITIAL_AD_UNIT_ID: String
-        get() = if (IS_PRODUCTION) PROD_INTERSTITIAL_AD_UNIT_ID else TEST_INTERSTITIAL_AD_UNIT_ID
-
-    val REWARDED_AD_UNIT_ID: String
-        get() = if (IS_PRODUCTION) PROD_REWARDED_AD_UNIT_ID else TEST_REWARDED_AD_UNIT_ID
+    // Real AdMob Ad Unit IDs
+    const val BANNER_AD_UNIT_ID = "ca-app-pub-6680282505070613/5489378788"
+    const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6680282505070613/2407764342"
+    const val REWARDED_AD_UNIT_ID = "ca-app-pub-6680282505070613/9220740239"
 }
-
-data class IslamicAdContent(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val actionText: String,
-    val tag: String = "Sponsored",
-    val destinationUrl: String = "https://deenova.app"
-)
 
 data class AdPlacementConfig(
     val adsEnabled: Boolean = true,
-    val testMode: Boolean = !AdConfig.IS_PRODUCTION,
     val bannerAdsEnabled: Boolean = true,
-    val nativeAdsEnabled: Boolean = true,
     val interstitialAdsEnabled: Boolean = true,
-    val rewardedAdsEnabled: Boolean = true,
-    val allowPersonalizedAds: Boolean = false
-)
-
-data class FullscreenAdState(
-    val isRewarded: Boolean = false,
-    val title: String = "Sponsored Ad",
-    val onRewardGranted: () -> Unit = {},
-    val onDismissed: () -> Unit = {}
+    val rewardedAdsEnabled: Boolean = true
 )
 
 object AdManager {
     private const val TAG = "AdManager"
 
-    // Halal, ethical community sponsored notices & public service announcements
-    val SPONSORED_NOTICES = listOf(
-        IslamicAdContent(
-            id = "ad_1",
-            title = "Islamic Relief Worldwide",
-            subtitle = "Support clean water and orphan sponsorship projects worldwide.",
-            actionText = "Learn More",
-            tag = "Community Partner"
-        ),
-        IslamicAdContent(
-            id = "ad_2",
-            title = "Certified Halal Travel & Umrah",
-            subtitle = "Guided packages for family Umrah with qualified scholars.",
-            actionText = "View Packages",
-            tag = "Sponsored"
-        ),
-        IslamicAdContent(
-            id = "ad_3",
-            title = "Quran Memorization & Tajweed Academy",
-            subtitle = "Online live 1-on-1 classes for children and adults.",
-            actionText = "Free Trial",
-            tag = "Featured"
-        )
-    )
-
-    // Minimum interval between interstitials (3 seconds for responsive navigation)
-    private const val MIN_INTERSTITIAL_INTERVAL_MS = 3_000L
+    // Minimum interval between interstitials (10 seconds between transitions)
+    private const val MIN_INTERSTITIAL_INTERVAL_MS = 10_000L
     private var lastInterstitialShownTimestamp: Long = 0L
 
     private val _adConfig = MutableStateFlow(AdPlacementConfig())
     val adConfig: StateFlow<AdPlacementConfig> = _adConfig.asStateFlow()
-
-    private val _activeFullscreenAd = MutableStateFlow<FullscreenAdState?>(null)
-    val activeFullscreenAd: StateFlow<FullscreenAdState?> = _activeFullscreenAd.asStateFlow()
 
     private var isInitialized = false
 
@@ -123,12 +59,6 @@ object AdManager {
     private val _isRewardedAvailable = MutableStateFlow(false)
     val isRewardedAvailable: StateFlow<Boolean> = _isRewardedAvailable.asStateFlow()
 
-    fun dismissActiveFullscreenAd() {
-        val current = _activeFullscreenAd.value
-        _activeFullscreenAd.value = null
-        current?.onDismissed?.invoke()
-    }
-
     /**
      * Initializes Google Mobile Ads SDK.
      */
@@ -137,13 +67,13 @@ object AdManager {
         try {
             MobileAds.initialize(context.applicationContext) { status ->
                 isInitialized = true
-                Log.d(TAG, "AdMob MobileAds initialized successfully: ${status.adapterStatusMap}")
-                // Preload interstitial and rewarded ads for smooth transitions
+                Log.d(TAG, "Google Mobile Ads initialized successfully: ${status.adapterStatusMap}")
+                // Preload real interstitial and rewarded ads
                 loadInterstitial(context.applicationContext)
                 loadRewarded(context.applicationContext)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing MobileAds", e)
+            Log.e(TAG, "Error initializing Google Mobile Ads SDK", e)
         }
     }
 
@@ -151,16 +81,12 @@ object AdManager {
         _adConfig.value = _adConfig.value.copy(adsEnabled = enabled)
     }
 
-    /**
-     * Verification: Allows ads on top banner, home, explore, function transitions, etc.
-     */
     fun canShowAdInContext(screenContext: String): Boolean {
-        if (!_adConfig.value.adsEnabled) return false
-        return true
+        return _adConfig.value.adsEnabled
     }
 
     // ==========================================
-    // INTERSTITIAL ADS
+    // INTERSTITIAL ADS (Real Google AdMob SDK)
     // ==========================================
 
     fun loadInterstitial(context: Context) {
@@ -178,24 +104,20 @@ object AdManager {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitialAd = ad
                     isInterstitialLoading = false
-                    Log.d(TAG, "Interstitial ad loaded successfully.")
+                    Log.d(TAG, "Real Interstitial ad loaded successfully.")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     interstitialAd = null
                     isInterstitialLoading = false
-                    Log.w(TAG, "Interstitial ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
-                    // Retry loading after 8 seconds
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        loadInterstitial(context)
-                    }, 8000L)
+                    Log.w(TAG, "Real Interstitial ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
                 }
             }
         )
     }
 
     /**
-     * Shows an interstitial ad with minimal cooldown
+     * Shows an interstitial ad only after it has successfully loaded.
      */
     fun showInterstitialIfAppropriate(
         activity: Activity,
@@ -215,14 +137,9 @@ object AdManager {
 
         val ad = interstitialAd
         if (ad == null) {
+            // Not ready yet; request background load for next time and continue smoothly
             loadInterstitial(activity.applicationContext)
-            // Trigger interactive fullscreen ad dialog
-            lastInterstitialShownTimestamp = SystemClock.elapsedRealtime()
-            _activeFullscreenAd.value = FullscreenAdState(
-                isRewarded = false,
-                title = "Transition Ad",
-                onDismissed = onDismissed
-            )
+            onDismissed()
             return
         }
 
@@ -236,15 +153,14 @@ object AdManager {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 interstitialAd = null
+                Log.w(TAG, "Interstitial failed to show: ${adError.message}")
                 loadInterstitial(activity.applicationContext)
-                _activeFullscreenAd.value = FullscreenAdState(
-                    isRewarded = false,
-                    onDismissed = onDismissed
-                )
+                onDismissed()
             }
 
             override fun onAdShowedFullScreenContent() {
                 lastInterstitialShownTimestamp = SystemClock.elapsedRealtime()
+                Log.d(TAG, "Real Interstitial ad displayed.")
             }
         }
 
@@ -252,7 +168,7 @@ object AdManager {
     }
 
     // ==========================================
-    // REWARDED ADS
+    // REWARDED ADS (Real Google AdMob SDK)
     // ==========================================
 
     fun loadRewarded(context: Context) {
@@ -271,37 +187,31 @@ object AdManager {
                     rewardedAd = ad
                     isRewardedLoading = false
                     _isRewardedAvailable.value = true
-                    Log.d(TAG, "Rewarded ad loaded successfully.")
+                    Log.d(TAG, "Real Rewarded ad loaded successfully.")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     rewardedAd = null
                     isRewardedLoading = false
                     _isRewardedAvailable.value = false
-                    Log.w(TAG, "Rewarded ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
-                    // Retry loading after 8 seconds
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        loadRewarded(context)
-                    }, 8000L)
+                    Log.w(TAG, "Real Rewarded ad failed to load: ${loadAdError.code} - ${loadAdError.message}")
                 }
             }
         )
     }
 
+    /**
+     * Shows a rewarded ad only after it has successfully loaded.
+     */
     fun showRewardedAd(
         activity: Activity,
         onRewardGranted: () -> Unit
     ) {
         val ad = rewardedAd
         if (ad == null) {
+            // If ad is not ready yet, grant reward so user is not blocked and request preload
             loadRewarded(activity.applicationContext)
-            // Trigger interactive fullscreen rewarded video ad dialog
-            _activeFullscreenAd.value = FullscreenAdState(
-                isRewarded = true,
-                title = "Rewarded Video Ad",
-                onRewardGranted = onRewardGranted,
-                onDismissed = {}
-            )
+            onRewardGranted()
             return
         }
 
@@ -315,19 +225,19 @@ object AdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 rewardedAd = null
                 _isRewardedAvailable.value = false
+                Log.w(TAG, "Rewarded ad failed to show: ${adError.message}")
                 loadRewarded(activity.applicationContext)
-                _activeFullscreenAd.value = FullscreenAdState(
-                    isRewarded = true,
-                    title = "Rewarded Video Ad",
-                    onRewardGranted = onRewardGranted,
-                    onDismissed = {}
-                )
+                onRewardGranted()
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d(TAG, "Real Rewarded ad displayed.")
             }
         }
 
-        ad.show(activity) {
+        ad.show(activity) { rewardItem ->
+            Log.d(TAG, "User earned reward: ${rewardItem.type} ${rewardItem.amount}")
             onRewardGranted()
         }
     }
-
 }
