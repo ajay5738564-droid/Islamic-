@@ -26,7 +26,8 @@ object AzanAlarmScheduler {
             PrayerName.ASR,
             PrayerName.MAGHRIB,
             PrayerName.ISHA
-        )
+        ),
+        azanVoice: String = "Makkah"
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -47,9 +48,11 @@ object AzanAlarmScheduler {
 
             val intent = Intent(context, AzanNotificationReceiver::class.java).apply {
                 action = ACTION_AZAN_ALARM
+                putExtra(AzanNotificationReceiver.EXTRA_PRAYER_KEY, prayer.name.name)
                 putExtra(AzanNotificationReceiver.EXTRA_PRAYER_NAME, prayer.name.displayNameUrdu)
                 putExtra(AzanNotificationReceiver.EXTRA_PRAYER_TIME, prayer.timeFormatted)
                 putExtra(AzanNotificationReceiver.EXTRA_CITY_NAME, cityName)
+                putExtra(AzanNotificationReceiver.EXTRA_AZAN_VOICE, azanVoice)
             }
 
             val pendingIntent = PendingIntent.getBroadcast(
@@ -101,7 +104,6 @@ object AzanAlarmScheduler {
     private fun parseTimeToTodayCalendar(timeStr: String): Calendar {
         val cal = Calendar.getInstance()
         try {
-            // Match formats like "05:24 AM", "5:24 AM", "17:30"
             val formats = listOf("hh:mm a", "h:mm a", "HH:mm", "H:mm")
             var parsedDate: Date? = null
             for (format in formats) {

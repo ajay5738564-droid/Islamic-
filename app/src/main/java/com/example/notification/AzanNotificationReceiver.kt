@@ -1,6 +1,5 @@
 package com.example.notification
 
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -14,38 +13,60 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.MainActivity
 import com.example.R
-import com.example.data.model.DailyPrayerSchedule
-import com.example.data.model.PrayerName
-import java.util.Calendar
 
 class AzanNotificationReceiver : BroadcastReceiver() {
 
     companion object {
         const val CHANNEL_ID = "azan_prayer_alerts_channel"
         const val CHANNEL_NAME = "Prayer Times & Azan Alarms"
+        const val ACTION_STOP_AZAN = "com.example.ACTION_STOP_AZAN"
+
+        const val EXTRA_PRAYER_KEY = "extra_prayer_key"
         const val EXTRA_PRAYER_NAME = "extra_prayer_name"
         const val EXTRA_PRAYER_TIME = "extra_prayer_time"
         const val EXTRA_CITY_NAME = "extra_city_name"
+        const val EXTRA_AZAN_VOICE = "extra_azan_voice"
+        const val NOTIFICATION_ID = 78601
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            // Re-schedule alarms on device boot
             return
         }
 
+        if (intent.action == ACTION_STOP_AZAN) {
+            AzanPlayerManager.stopAzan()
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(NOTIFICATION_ID)
+            return
+        }
+
+        val prayerKey = intent.getStringExtra(EXTRA_PRAYER_KEY) ?: "PRAYER"
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME) ?: "نماز"
         val prayerTime = intent.getStringExtra(EXTRA_PRAYER_TIME) ?: ""
         val cityName = intent.getStringExtra(EXTRA_CITY_NAME) ?: ""
+        val azanVoice = intent.getStringExtra(EXTRA_AZAN_VOICE) ?: "Makkah"
+        val isFajr = prayerKey.equals("FAJR", ignoreCase = true)
 
-        showAzanNotification(context, prayerName, prayerTime, cityName)
+        // 1. Play the Azan Audio directly with full alarm volume
+        AzanPlayerManager.playAzan(
+            context = context,
+            voiceId = azanVoice,
+            prayerName = prayerName,
+            isFajr = isFajr
+        )
+
+        // 2. Show the Rich Notification with Azan Control buttons
+        showAzanNotification(context, prayerName, prayerTime, cityName, azanVoice)
     }
 
     private fun showAzanNotification(
         context: Context,
         prayerName: String,
         prayerTime: String,
-        cityName: String
+        cityName: String,
+        azanVoice: String
     ) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -63,43 +84,63 @@ class AzanNotificationReceiver : BroadcastReceiver() {
                 CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Daily 5-time Azan and Salah time notifications"
+                description = "Daily 5-time Azan sound and Salah time alarms"
                 enableVibration(true)
-                vibrationPattern = longArrayOf(0, 500, 200, 500, 200, 500)
+                vibrationPattern = longArrayOf(0, 600, 300, 600, 300, 600)
                 setSound(defaultSoundUri, audioAttributes)
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
             }
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Open App Intent
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val pendingIntent = PendingIntent.getActivity(
+        val pendingOpenAppIntent = PendingIntent.getActivity(
             context,
-            prayerName.hashCode(),
+            1001,
             openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Stop Azan Intent
+        val stopAzanIntent = Intent(context, AzanNotificationReceiver::class.java).apply {
+            action = ACTION_STOP_AZAN
+        }
+        val pendingStopAzanIntent = PendingIntent.getBroadcast(
+            context,
+            1002,
+            stopAzanIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val title = "🕌 وقتِ $prayerName ($prayerTime)"
         val content = "حَیَّ عَلَی الصَّلٰوةِ - نماز قائم کریں ($cityName)"
+        val fullText = "$content\n\nاللہ اکبر اللہ اکبر! نماز کا وقت ہو چکا ہے۔ اپنے رب کے حضور سجدہ ریز ہو جائیے۔\n🔊 اذان آواز: $azanVoice"
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(content)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText("$content\n\nاللہ اکبر اللہ اکبر! نماز کا وقت ہو چکا ہے۔ اپنے رب کے حضور سجدہ ریز ہو جائیے۔")
-            )
+            .setStyle(NotificationCompat.BigTextStyle().bigText(fullText))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .setVibrate(longArrayOf(0, 500, 200, 500, 200, 500))
+            .setContentIntent(pendingOpenAppIntent)
+            .setVibrate(longArrayOf(0, 600, 300, 600, 300, 600))
+            .addAction(
+                android.R.drawable.ic_media_pause,
+                "⏹️ اذان بند کریں (Stop)",
+                pendingStopAzanIntent
+            )
+            .addAction(
+                android.R.drawable.ic_menu_today,
+                "🕌 اوقاتِ نماز (Open)",
+                pendingOpenAppIntent
+            )
             .build()
 
-        notificationManager.notify(prayerName.hashCode(), notification)
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 }

@@ -631,7 +631,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Azan Alarms Logic
+    // Azan Alarms & Audio Logic
+    val isAzanAudioPlaying: StateFlow<Boolean> = com.example.notification.AzanPlayerManager.isPlaying
+    val currentPlayingAzanVoice: StateFlow<String?> = com.example.notification.AzanPlayerManager.currentPlayingVoice
+
     fun togglePrayerAlarm(prayerName: PrayerName) {
         viewModelScope.launch {
             preferences.togglePrayerAlarm(prayerName)
@@ -642,7 +645,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setAzanVoice(voice: String) {
         viewModelScope.launch {
             preferences.setAzanVoice(voice)
+            syncPrayerAlarms()
         }
+    }
+
+    fun playAzanVoicePreview(context: Context, voiceId: String) {
+        com.example.notification.AzanPlayerManager.playAzan(
+            context = context,
+            voiceId = voiceId,
+            prayerName = "ٹیسٹ اذان",
+            isFajr = false
+        )
+    }
+
+    fun stopAzanAudio() {
+        com.example.notification.AzanPlayerManager.stopAzan()
     }
 
     fun testAzanAlarm(context: Context, prayerName: PrayerName) {
@@ -650,9 +667,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val prayer = schedule.prayers.firstOrNull { it.name == prayerName } ?: return
         val receiver = com.example.notification.AzanNotificationReceiver()
         val intent = android.content.Intent().apply {
+            action = com.example.notification.AzanAlarmScheduler.ACTION_AZAN_ALARM
+            putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_PRAYER_KEY, prayerName.name)
             putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_PRAYER_NAME, prayerName.displayNameUrdu)
             putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_PRAYER_TIME, prayer.timeFormatted)
             putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_CITY_NAME, cityName.value)
+            putExtra(com.example.notification.AzanNotificationReceiver.EXTRA_AZAN_VOICE, azanVoice.value)
         }
         receiver.onReceive(context, intent)
     }
@@ -667,10 +687,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (notifyIsha.value) enabledPrayers.add(PrayerName.ISHA)
 
         AzanAlarmScheduler.schedulePrayerAlarms(
-            getApplication(),
-            schedule,
-            cityName.value,
-            enabledPrayers
+            context = getApplication(),
+            schedule = schedule,
+            cityName = cityName.value,
+            enabledPrayers = enabledPrayers,
+            azanVoice = azanVoice.value
         )
     }
 
