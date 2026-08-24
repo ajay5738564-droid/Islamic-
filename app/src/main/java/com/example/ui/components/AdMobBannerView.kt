@@ -1,30 +1,41 @@
 package com.example.ui.components
 
-import android.content.Context
-import android.util.Log
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.data.ads.AdConfig
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.data.ads.AdManager
 import com.example.data.repository.AppLanguage
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
 
 /**
- * Real Google AdMob Banner Composable.
- * Uses ONLY the real AdMob Banner Ad Unit ID: ca-app-pub-6680282505070613/5489378788.
+ * Universal Banner View Composable.
+ * Prepared for Unity Banner Ads / Custom Ad placement.
  */
 @Composable
 fun AdMobBannerView(
@@ -41,6 +52,7 @@ fun AdMobBannerView(
 
     if (!canShow || !config.bannerAdsEnabled || isPreview) return
 
+    // Non-intrusive banner container ready for Unity Banner integration
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -48,58 +60,36 @@ fun AdMobBannerView(
             .testTag("admob_banner_$screenContext"),
         contentAlignment = Alignment.Center
     ) {
-        AndroidView(
+        // Space reserved for Unity Banner View
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
-            factory = { ctx: Context ->
-                val frameLayout = FrameLayout(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-                val adView = AdView(ctx).apply {
-                    setAdSize(AdSize.BANNER)
-                    adUnitId = AdConfig.BANNER_AD_UNIT_ID
-                    layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        android.view.Gravity.CENTER
-                    )
-
-                    adListener = object : AdListener() {
-                        override fun onAdLoaded() {
-                            Log.d("AdMobBanner", "Real AdMob banner loaded successfully for unit: $adUnitId")
-                        }
-
-                        override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                            Log.w(
-                                "AdMobBanner",
-                                "AdMob banner request failed (${loadAdError.code}: ${loadAdError.message})."
-                            )
-                        }
-
-                        override fun onAdOpened() {
-                            Log.d("AdMobBanner", "Ad opened by user.")
-                        }
-
-                        override fun onAdClicked() {
-                            Log.d("AdMobBanner", "Ad clicked.")
-                        }
-                    }
-
-                    // Request real AdMob Ad
-                    loadAd(AdRequest.Builder().build())
-                }
-
-                frameLayout.addView(adView)
-                frameLayout
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .height(42.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (currentLanguage == AppLanguage.URDU) "دینِ اسلام - نماز، قرآن اور اذان" else "Deenova: Quran, Prayers & Azan",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                )
             }
-        )
+        }
     }
 }
-
-
-
