@@ -218,21 +218,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val prayerTrackerState = preferences.getDailyPrayerTrackerFlow(todayDateString)
         .stateIn(viewModelScope, SharingStarted.Eagerly, com.example.data.model.DailyPrayerTrackerState(todayDateString))
 
-    // Unlocked Surahs via Rewarded Ads
-    val unlockedSurahs = preferences.unlockedSurahsFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, setOf(1, 2, 36, 55, 67, 112, 113, 114))
-
-    fun unlockSurah(surahNumber: Int) {
-        viewModelScope.launch {
-            preferences.unlockSurah(surahNumber)
-            triggerTargetReachedHaptic()
-        }
-    }
-
     fun isSurahUnlocked(surahNumber: Int): Boolean {
-        // Surahs 1 through 30 are free by default, special paths unlocked via rewarded ads
-        if (surahNumber <= 30) return true
-        return unlockedSurahs.value.contains(surahNumber)
+        return true
     }
 
     fun togglePrayerTracked(prayerName: PrayerName) {

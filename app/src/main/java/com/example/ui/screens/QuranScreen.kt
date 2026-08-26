@@ -44,14 +44,9 @@ fun QuranScreen(
     val searchQuery by viewModel.quranSearchQuery.collectAsState()
     val currentPlayingAyah by viewModel.currentPlayingAyah.collectAsState()
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
-    val unlockedSurahs by viewModel.unlockedSurahs.collectAsState()
     val currentLanguage by viewModel.appLanguage.collectAsState()
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val activity = context as? android.app.Activity
-
     var selectedTab by remember { mutableStateOf(0) } // 0: Surah List, 1: Juz List
-    var surahToUnlock by remember { mutableStateOf<Surah?>(null) }
 
     if (selectedSurah != null) {
         // Detailed Surah Reading Screen
@@ -291,20 +286,9 @@ fun QuranScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(filteredSurahs, key = { it.number }) { surah ->
-                        val isUnlocked = viewModel.isSurahUnlocked(surah.number)
                         SurahListItemCard(
                             surah = surah,
-                            isUnlocked = isUnlocked,
-                            onLockedClick = {
-                                surahToUnlock = surah
-                            },
                             onClick = {
-                                if (activity != null) {
-                                    com.example.data.ads.AdManager.showInterstitialIfAppropriate(
-                                        activity = activity,
-                                        contextTag = "quran_surah_open"
-                                    )
-                                }
                                 viewModel.selectSurah(surah)
                             }
                         )
@@ -327,12 +311,6 @@ fun QuranScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    if (activity != null) {
-                                        com.example.data.ads.AdManager.showInterstitialIfAppropriate(
-                                            activity = activity,
-                                            contextTag = "quran_juz_open"
-                                        )
-                                    }
                                     viewModel.selectSurah(startingSurah)
                                 }
                                 .testTag("juz_item_$juzNum"),
@@ -398,101 +376,22 @@ fun QuranScreen(
         }
     }
 
-    // Rewarded Ad Dialog for unlocking Surahs
-    surahToUnlock?.let { surah ->
-        AlertDialog(
-            onDismissRequest = { surahToUnlock = null },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.LockOpen,
-                    contentDescription = "Unlock Surah",
-                    tint = GoldAccent,
-                    modifier = Modifier.size(36.dp)
-                )
-            },
-            title = {
-                Text(
-                    text = when (currentLanguage) {
-                        com.example.data.repository.AppLanguage.URDU -> "سورۃ انلاک کریں (Watch Ad)"
-                        com.example.data.repository.AppLanguage.HINDI -> "सूरह अनलॉक करें"
-                        else -> "Unlock Surah"
-                    },
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            },
-            text = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "${surah.number}. ${surah.nameEnglish} (${surah.nameArabic})",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = when (currentLanguage) {
-                            com.example.data.repository.AppLanguage.URDU -> "ایک چھوٹا ویڈیو اشتہار دیکھ کر آپ اس سورۃ مبارکہ کو ہمیشہ کے لیے مفت انلاک کر سکتے ہیں۔"
-                            com.example.data.repository.AppLanguage.HINDI -> "एक छोटा वीडियो विज्ञापन देखकर आप इस सूरह को हमेशा के लिए अनलॉक कर सकते हैं।"
-                            else -> "Watch a short rewarded video ad to unlock this Surah permanently for free."
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val currentSurah = surah
-                        surahToUnlock = null
-                        if (activity != null) {
-                            com.example.data.ads.AdManager.showRewardedAd(activity) {
-                                viewModel.unlockSurah(currentSurah.number)
-                                viewModel.selectSurah(currentSurah)
-                            }
-                        } else {
-                            viewModel.unlockSurah(currentSurah.number)
-                            viewModel.selectSurah(currentSurah)
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Watch Video Ad")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { surahToUnlock = null }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 }
 
 @Composable
 fun SurahListItemCard(
     surah: Surah,
-    isUnlocked: Boolean,
-    onLockedClick: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = {
-                if (isUnlocked) onClick() else onLockedClick()
-            })
+            .clickable(onClick = onClick)
             .testTag("surah_item_${surah.number}"),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isUnlocked) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -510,7 +409,7 @@ fun SurahListItemCard(
                 // Surah Number Diamond/Square Box
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isUnlocked) MaterialTheme.colorScheme.primaryContainer else GoldLight.copy(alpha = 0.3f),
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     modifier = Modifier.size(42.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -518,47 +417,18 @@ fun SurahListItemCard(
                             text = "${surah.number}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (isUnlocked) MaterialTheme.colorScheme.primary else Color(0xFFB8860B)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
 
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text = surah.nameEnglish,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        if (!isUnlocked) {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = GoldAccent,
-                                modifier = Modifier.padding(start = 4.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Lock,
-                                        contentDescription = "Locked",
-                                        tint = Color.Black,
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Text(
-                                        text = "Ad Unlock",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    Text(
+                        text = surah.nameEnglish,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     Text(
                         text = "${surah.englishMeaning} • ${surah.numberOfAyahs} verses",
                         style = MaterialTheme.typography.bodySmall,
@@ -572,7 +442,7 @@ fun SurahListItemCard(
                 Text(
                     text = surah.nameArabic,
                     style = ArabicTextStyle.copy(fontSize = 20.sp),
-                    color = if (isUnlocked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = surah.revelationType,

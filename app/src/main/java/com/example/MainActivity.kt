@@ -40,7 +40,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        com.example.data.ads.AdManager.initializeAds(this)
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
             val isDarkTheme = when (themeMode) {
@@ -126,35 +125,18 @@ fun DeenovaApp(
                 selectedTab = currentTab,
                 currentLanguage = currentLanguage,
                 onTabSelected = { tab ->
-                    if (tab != currentTab && activity != null) {
-                        com.example.data.ads.AdManager.showInterstitialIfAppropriate(
-                            activity = activity,
-                            contextTag = "tab_${tab.name.lowercase()}"
-                        )
-                    }
                     viewModel.setTab(tab)
                 }
             )
         }
     ) { innerPadding ->
-        androidx.compose.foundation.layout.Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Upper side persistent AdMob banner - always active
-            com.example.ui.components.AdMobBannerView(
-                screenContext = "app_top_persistent",
-                currentLanguage = currentLanguage
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                // Main Screen Content
-                when (currentTab) {
+            // Main Screen Content
+            when (currentTab) {
                     NavigationTab.HOME -> {
                         HomeScreen(
                             viewModel = viewModel,
@@ -208,9 +190,8 @@ fun DeenovaApp(
                 }
             }
         }
-    }
 
-    // Modal Dialogs
+        // Modal Dialogs
     if (showExitDialog) {
         ExitConfirmationDialog(
             viewModel = viewModel,

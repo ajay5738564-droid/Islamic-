@@ -75,16 +75,7 @@ fun HomeScreen(
     val featuredHadith = HadithRepository.ALL_HADITHS.first()
     val upcomingEvents = HijriCalendarRepository.getMajorIslamicEvents().filter { it.isMajor }.take(2)
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val activity = context as? android.app.Activity
-
-    fun navigateWithAd(tab: NavigationTab, subScreen: ExploreSubScreen? = null) {
-        if (activity != null) {
-            com.example.data.ads.AdManager.showInterstitialIfAppropriate(
-                activity = activity,
-                contextTag = "home_quick_${subScreen?.name?.lowercase() ?: tab.name.lowercase()}"
-            )
-        }
+    fun navigateToScreen(tab: NavigationTab, subScreen: ExploreSubScreen? = null) {
         viewModel.setTab(tab)
         if (subScreen != null) {
             viewModel.setExploreSubScreen(subScreen)
@@ -185,7 +176,7 @@ fun HomeScreen(
                     trackerState = trackerState,
                     onTogglePrayer = { viewModel.togglePrayerTracked(it) },
                     onOpenFullGuide = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.NAMAZ_GUIDE)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.NAMAZ_GUIDE)
                     }
                 )
             }
@@ -217,7 +208,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_namaz_guide",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.NAMAZ_GUIDE)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.NAMAZ_GUIDE)
                     }
                 )
                 QuickAccessButton(
@@ -229,7 +220,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_naat_player",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.NAAT_PLAYER)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.NAAT_PLAYER)
                     }
                 )
                 QuickAccessButton(
@@ -241,7 +232,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_names_of_allah",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.NAMES_OF_ALLAH)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.NAMES_OF_ALLAH)
                     }
                 )
                 QuickAccessButton(
@@ -253,7 +244,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_azan_alarms",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.AZAN_SETTINGS)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.AZAN_SETTINGS)
                     }
                 )
             }
@@ -274,7 +265,7 @@ fun HomeScreen(
                         else -> "Quran"
                     },
                     testTag = "quick_quran",
-                    onClick = { navigateWithAd(NavigationTab.QURAN) }
+                    onClick = { navigateToScreen(NavigationTab.QURAN) }
                 )
                 QuickAccessButton(
                     icon = Icons.Default.CompassCalibration,
@@ -285,7 +276,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_qibla",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.QIBLA)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.QIBLA)
                     }
                 )
                 QuickAccessButton(
@@ -297,7 +288,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_tasbeeh",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.TASBEEH)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.TASBEEH)
                     }
                 )
                 QuickAccessButton(
@@ -309,7 +300,7 @@ fun HomeScreen(
                     },
                     testTag = "quick_calendar",
                     onClick = {
-                        navigateWithAd(NavigationTab.EXPLORE, ExploreSubScreen.ISLAMIC_CALENDAR)
+                        navigateToScreen(NavigationTab.EXPLORE, ExploreSubScreen.ISLAMIC_CALENDAR)
                     }
                 )
             }
@@ -525,15 +516,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-
-        // Respectful Non-Intrusive AdMob Banner
-        item {
-            Spacer(modifier = Modifier.height(14.dp))
-            com.example.ui.components.AdMobBannerView(
-                screenContext = "home_bottom",
-                currentLanguage = currentLanguage
-            )
         }
     }
 }

@@ -57,25 +57,9 @@ class UserPreferencesRepository(private val context: Context) {
         val TASBEEH_SOUND = booleanPreferencesKey("tasbeeh_sound")
         val DARK_THEME = booleanPreferencesKey("dark_theme")
         val AZAN_VOICE = stringPreferencesKey("azan_voice")
-        val UNLOCKED_SURAHS = stringPreferencesKey("unlocked_surahs")
 
         fun prayerKey(dateStr: String, prayer: PrayerName) = booleanPreferencesKey("prayer_${dateStr}_${prayer.name}")
         fun alarmKey(prayer: PrayerName) = booleanPreferencesKey("alarm_${prayer.name}")
-    }
-
-    val unlockedSurahsFlow: Flow<Set<Int>> = context.dataStore.data.map { prefs ->
-        val raw = prefs[PreferencesKeys.UNLOCKED_SURAHS] ?: ""
-        if (raw.isBlank()) emptySet()
-        else raw.split(",").mapNotNull { it.trim().toIntOrNull() }.toSet()
-    }
-
-    suspend fun unlockSurah(surahNumber: Int) {
-        context.dataStore.edit { prefs ->
-            val raw = prefs[PreferencesKeys.UNLOCKED_SURAHS] ?: ""
-            val current = if (raw.isBlank()) mutableSetOf<Int>() else raw.split(",").mapNotNull { it.trim().toIntOrNull() }.toMutableSet()
-            current.add(surahNumber)
-            prefs[PreferencesKeys.UNLOCKED_SURAHS] = current.joinToString(",")
-        }
     }
 
     val notifyFajrFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.FAJR)] ?: true }
