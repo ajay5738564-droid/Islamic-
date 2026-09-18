@@ -517,6 +517,11 @@ fun HomeScreen(
                 }
             }
         }
+
+        // Unity Banner Ad: Respectfully placed at the bottom of the home content feed
+        item {
+            com.example.ads.unity.UnityBannerAd()
+        }
     }
 }
 

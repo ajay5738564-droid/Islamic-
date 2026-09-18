@@ -268,6 +268,9 @@ fun ExploreMainMenu(
                     testTag = "explore_item_sources",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.SOURCES) }
                 )
+
+                // Unity Banner Ad
+                com.example.ads.unity.UnityBannerAd()
             }
         }
     }

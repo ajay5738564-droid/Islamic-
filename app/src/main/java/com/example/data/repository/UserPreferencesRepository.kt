@@ -57,6 +57,8 @@ class UserPreferencesRepository(private val context: Context) {
         val TASBEEH_SOUND = booleanPreferencesKey("tasbeeh_sound")
         val DARK_THEME = booleanPreferencesKey("dark_theme")
         val AZAN_VOICE = stringPreferencesKey("azan_voice")
+        val REWARDED_SUPPORTER_STATUS = booleanPreferencesKey("rewarded_supporter_status")
+        val REWARD_POINTS = intPreferencesKey("user_reward_points")
 
         fun prayerKey(dateStr: String, prayer: PrayerName) = booleanPreferencesKey("prayer_${dateStr}_${prayer.name}")
         fun alarmKey(prayer: PrayerName) = booleanPreferencesKey("alarm_${prayer.name}")
@@ -212,6 +214,17 @@ class UserPreferencesRepository(private val context: Context) {
                 maghribDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.MAGHRIB)] ?: false,
                 ishaDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.ISHA)] ?: false
             )
+        }
+    }
+
+    val supporterStatusFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.REWARDED_SUPPORTER_STATUS] ?: false }
+    val rewardPointsFlow: Flow<Int> = context.dataStore.data.map { it[PreferencesKeys.REWARD_POINTS] ?: 0 }
+
+    suspend fun grantAdReward(points: Int = 100) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[PreferencesKeys.REWARD_POINTS] ?: 0
+            prefs[PreferencesKeys.REWARD_POINTS] = current + points
+            prefs[PreferencesKeys.REWARDED_SUPPORTER_STATUS] = true
         }
     }
 

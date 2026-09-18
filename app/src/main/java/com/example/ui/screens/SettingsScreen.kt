@@ -45,11 +45,16 @@ fun SettingsScreen(
     val hijriAdjustment by viewModel.hijriAdjustment.collectAsState()
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
     val tasbeehVibrate by viewModel.tasbeehVibrate.collectAsState()
+    val isSupporter by viewModel.isSupporter.collectAsState()
+    val rewardPoints by viewModel.rewardPoints.collectAsState()
 
     var showMethodDialog by remember { mutableStateOf(false) }
     var showMadhabDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showRewardPromptDialog by remember { mutableStateOf(false) }
+    var showRewardResultDialog by remember { mutableStateOf(false) }
+    var rewardResultMessage by remember { mutableStateOf("") }
 
     LazyColumn(
         modifier = modifier
@@ -317,6 +322,146 @@ fun SettingsScreen(
             )
         }
 
+        // Section: Optional Support & Rewarded Ads
+        item {
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = when (currentLanguage) {
+                    AppLanguage.URDU -> "ایپ کی معاونت اور انعام"
+                    AppLanguage.HINDI -> "ऐप सपोर्ट व रिवॉर्ड"
+                    else -> "Support App & Earn Rewards"
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+            )
+        }
+
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = if (isSupporter) Icons.Default.VolunteerActivism else Icons.Default.CardGiftcard,
+                                    contentDescription = "Reward",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = when (currentLanguage) {
+                                    AppLanguage.URDU -> "معاونت کا انعام (Supporter Reward)"
+                                    AppLanguage.HINDI -> "विज्ञापन देखकर Reward प्राप्त करें"
+                                    else -> "Support App & Earn Reward"
+                                },
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (isSupporter) {
+                                    when (currentLanguage) {
+                                        AppLanguage.URDU -> "فعال معاون بیج حاصل شدہ • $rewardPoints انعامی پوائنٹس"
+                                        AppLanguage.HINDI -> "सक्रिय समर्थक बैज प्राप्त • $rewardPoints रिवॉर्ड अंक"
+                                        else -> "Supporter Badge Unlocked • $rewardPoints Points"
+                                    }
+                                } else {
+                                    when (currentLanguage) {
+                                        AppLanguage.URDU -> "مفت اسلامی ایپ کو سپورٹ کرنے کے لیے ویڈیو دیکھیں"
+                                        AppLanguage.HINDI -> "मुफ़्त ऐप को सपोर्ट करने हेतु वीडियो विज्ञापन देखें"
+                                        else -> "Watch an optional short video ad to support our Islamic app"
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = { showRewardPromptDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("watch_rewarded_ad_button"),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayCircleOutline,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = when (currentLanguage) {
+                                AppLanguage.URDU -> "اشتہار دیکھ کر انعام حاصل کریں (+100)"
+                                AppLanguage.HINDI -> "विज्ञापन देखकर Reward प्राप्त करें (+100)"
+                                else -> "Watch Ad to Earn Reward (+100)"
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Unity Ads Diagnostics Info
+                    val adsStatus by com.example.ads.unity.UnityAdsManager.adsStatusMessage.collectAsState()
+                    val isAdsInit by com.example.ads.unity.UnityAdsManager.isInitialized.collectAsState()
+                    val isInterstitialReady by com.example.ads.unity.UnityAdsManager.isInterstitialLoaded.collectAsState()
+                    val isRewardedReady by com.example.ads.unity.UnityAdsManager.isRewardedLoaded.collectAsState()
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Ads Status: $adsStatus",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isAdsInit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "SDK: ${if (isAdsInit) "Active" else "Connecting..."} • Interstitial: ${if (isInterstitialReady) "Ready" else "Preloading"} • Rewarded: ${if (isRewardedReady) "Ready" else "Preloading"}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Section: About & Guidelines
         item {
             Spacer(modifier = Modifier.height(14.dp))
@@ -350,6 +495,11 @@ fun SettingsScreen(
                 testTag = "setting_about_item",
                 onClick = { showAboutDialog = true }
             )
+        }
+
+        // Unity Banner Ad
+        item {
+            com.example.ads.unity.UnityBannerAd()
         }
     }
 
@@ -510,6 +660,119 @@ fun SettingsScreen(
                 }
             },
             confirmButton = { TextButton(onClick = { showAboutDialog = false }) { Text("Close") } }
+        )
+    }
+
+    // Rewarded Ad Confirmation Dialog
+    if (showRewardPromptDialog) {
+        val activity = context as? android.app.Activity
+        AlertDialog(
+            onDismissRequest = { showRewardPromptDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.CardGiftcard,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            title = {
+                Text(
+                    text = when (currentLanguage) {
+                        AppLanguage.URDU -> "اشتہار دیکھ کر انعام حاصل کریں"
+                        AppLanguage.HINDI -> "विज्ञापन देखकर Reward प्राप्त करें"
+                        else -> "Watch Ad to Earn Reward"
+                    },
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = when (currentLanguage) {
+                        AppLanguage.URDU -> "کیا آپ ایک مختصر ویڈیو اشتہار دیکھ کر ایپ کو سپورٹ کرنا اور 100 انعامی پوائنٹس حاصل کرنا چاہتے ہیں؟"
+                        AppLanguage.HINDI -> "क्या आप एक छोटा विज्ञापन देखकर ऐप को सपोर्ट करना और 100 रिवॉर्ड अंक प्राप्त करना चाहते हैं?"
+                        else -> "Would you like to watch a short sponsored video ad to support our free Islamic app and earn 100 supporter points?"
+                    }
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRewardPromptDialog = false
+                        if (activity != null) {
+                            com.example.ads.unity.UnityAdsManager.showRewardedAd(
+                                activity = activity,
+                                onRewardEarned = {
+                                    viewModel.claimAdReward(100)
+                                    rewardResultMessage = when (currentLanguage) {
+                                        AppLanguage.URDU -> "ماشاءاللہ! آپ کا انعام کامیابی سے شامل کر دیا گیا۔ 100 پوائنٹس اور معاون بیج فعال ہو گیا۔"
+                                        AppLanguage.HINDI -> "माशाअल्लाह! आपका रिवॉर्ड सफलतापूर्वक अनलॉक हो गया। 100 अंक व समर्थक बैज प्राप्त हुआ।"
+                                        else -> "Masha'Allah! Your reward was granted successfully. 100 points and supporter status unlocked."
+                                    }
+                                    showRewardResultDialog = true
+                                },
+                                onDismissed = { completed ->
+                                    if (!completed) {
+                                        rewardResultMessage = when (currentLanguage) {
+                                            AppLanguage.URDU -> "اشتہار مکمل نہیں ہوا، انعام شامل نہیں کیا گیا۔"
+                                            AppLanguage.HINDI -> "विज्ञापन पूरा नहीं हुआ, इसलिए रिवॉर्ड नहीं मिला।"
+                                            else -> "Ad was not completed, no reward was granted."
+                                        }
+                                        showRewardResultDialog = true
+                                    }
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Text(
+                        text = when (currentLanguage) {
+                            AppLanguage.URDU -> "اشتہار دیکھیں"
+                            AppLanguage.HINDI -> "विज्ञापन देखें"
+                            else -> "Watch Ad"
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRewardPromptDialog = false }) {
+                    Text(
+                        text = when (currentLanguage) {
+                            AppLanguage.URDU -> "منسوخ"
+                            AppLanguage.HINDI -> "रद्द करें"
+                            else -> "Cancel"
+                        }
+                    )
+                }
+            }
+        )
+    }
+
+    // Rewarded Ad Outcome Dialog
+    if (showRewardResultDialog) {
+        AlertDialog(
+            onDismissRequest = { showRewardResultDialog = false },
+            title = {
+                Text(
+                    text = when (currentLanguage) {
+                        AppLanguage.URDU -> "انعام کی صورتحال"
+                        AppLanguage.HINDI -> "रिवॉर्ड स्थिति"
+                        else -> "Reward Status"
+                    },
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = { Text(rewardResultMessage) },
+            confirmButton = {
+                TextButton(onClick = { showRewardResultDialog = false }) {
+                    Text(
+                        text = when (currentLanguage) {
+                            AppLanguage.URDU -> "ٹھیک ہے"
+                            AppLanguage.HINDI -> "ठीक है"
+                            else -> "OK"
+                        }
+                    )
+                }
+            }
         )
     }
 }

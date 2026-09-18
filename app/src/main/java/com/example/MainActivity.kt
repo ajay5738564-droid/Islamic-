@@ -40,6 +40,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Initialize Unity Ads SDK safely at application start
+        com.example.ads.unity.UnityAdsManager.initialize(this)
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
             val isDarkTheme = when (themeMode) {
@@ -125,6 +127,14 @@ fun DeenovaApp(
                 selectedTab = currentTab,
                 currentLanguage = currentLanguage,
                 onTabSelected = { tab ->
+                    if (tab != currentTab && activity != null) {
+                        // Frequency-controlled interstitial: never interrupt active Quran reading or audio recitation
+                        val isQuranReading = currentTab == NavigationTab.QURAN && selectedSurah != null
+                        val isAudioPlaying = playingAyah != null
+                        if (!isQuranReading && !isAudioPlaying) {
+                            com.example.ads.unity.UnityAdsManager.showInterstitial(activity)
+                        }
+                    }
                     viewModel.setTab(tab)
                 }
             )

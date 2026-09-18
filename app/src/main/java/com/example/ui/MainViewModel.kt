@@ -204,6 +204,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val arabicFontSize = preferences.arabicFontSizeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 26)
     val tasbeehVibrate = preferences.tasbeehVibrateFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val themeMode = preferences.themeModeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
+    val isSupporter = preferences.supporterStatusFlow.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val rewardPoints = preferences.rewardPointsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+
+    fun claimAdReward(points: Int = 100) {
+        viewModelScope.launch {
+            preferences.grantAdReward(points)
+        }
+    }
 
     // Prayer Alarms
     val notifyFajr = preferences.notifyFajrFlow.stateIn(viewModelScope, SharingStarted.Eagerly, true)
