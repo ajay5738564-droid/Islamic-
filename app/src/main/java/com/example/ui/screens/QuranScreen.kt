@@ -18,6 +18,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import com.example.ads.unity.UnityAdsManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +42,10 @@ fun QuranScreen(
     modifier: Modifier = Modifier
 ) {
     val selectedSurah by viewModel.selectedSurah.collectAsState()
+    val selectedJuz by viewModel.selectedJuz.collectAsState()
+    val unlockedJuz by viewModel.unlockedQuranJuz.collectAsState()
+    val context = LocalContext.current
+    var showJuzUnlockDialog by remember { mutableStateOf<Int?>(null) }
     val ayahs by viewModel.currentSurahAyahs.collectAsState()
     val isLoading by viewModel.isSurahLoading.collectAsState()
     val searchQuery by viewModel.quranSearchQuery.collectAsState()
@@ -48,9 +55,9 @@ fun QuranScreen(
 
     var selectedTab by remember { mutableStateOf(0) } // 0: Surah List, 1: Juz List
 
-    if (selectedSurah != null) {
-        // Detailed Surah Reading Screen
-        val surah = selectedSurah!!
+    if (selectedSurah != null || selectedJuz != null) {
+        // Detailed Surah or complete Juz reading screen
+        val surah = selectedSurah ?: QuranRepository.ALL_114_SURAHS.firstOrNull { it.number == ayahs.firstOrNull()?.surahNumber } ?: QuranRepository.ALL_114_SURAHS.first()
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -81,13 +88,13 @@ fun QuranScreen(
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "${surah.number}. ${surah.nameEnglish}",
+                            text = if (selectedJuz != null) "Juz $selectedJuz (Para $selectedJuz)" else "${surah.number}. ${surah.nameEnglish}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "${surah.revelationType} • ${surah.numberOfAyahs} Verses • Juz ${surah.startingJuz}",
+                            text = if (selectedJuz != null) "${ayahs.size} Verses • Complete Para" else "${surah.revelationType} • ${surah.numberOfAyahs} Verses • Juz ${surah.startingJuz}",
                             style = MaterialTheme.typography.labelSmall,
                             color = GoldLight
                         )
@@ -114,7 +121,7 @@ fun QuranScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Bismillah Header (except for Surah At-Tawbah #9)
-                    if (surah.number != 9) {
+                    if (selectedJuz == null && surah.number != 9) {
                         item {
                             Card(
                                 modifier = Modifier
@@ -148,7 +155,7 @@ fun QuranScreen(
 
                         QuranVerseCard(
                             ayah = ayah,
-                            surahName = surah.nameEnglish,
+                            surahName = QuranRepository.ALL_114_SURAHS.find { it.number == ayah.surahNumber }?.nameEnglish ?: surah.nameEnglish,
                             isPlaying = isPlaying,
                             isBookmarked = isBookmarked,
                             arabicFontSizeSp = arabicFontSize,
@@ -311,7 +318,11 @@ fun QuranScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    viewModel.selectSurah(startingSurah)
+                                    if (viewModel.isJuzUnlocked(juzNum)) {
+                                        viewModel.selectJuz(juzNum)
+                                    } else {
+                                        showJuzUnlockDialog = juzNum
+                                    }
                                 }
                                 .testTag("juz_item_$juzNum"),
                             shape = RoundedCornerShape(14.dp),
@@ -360,9 +371,9 @@ fun QuranScreen(
                                 }
 
                                 Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = "Open Juz",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    imageVector = if (juzNum == 1 || juzNum in unlockedJuz) Icons.Default.ChevronRight else Icons.Default.Lock,
+                                    contentDescription = if (juzNum == 1 || juzNum in unlockedJuz) "Open Juz" else "Locked - watch one video to unlock",
+                                    tint = if (juzNum == 1 || juzNum in unlockedJuz) MaterialTheme.colorScheme.onSurfaceVariant else GoldAccent
                                 )
                             }
                         }
@@ -376,6 +387,35 @@ fun QuranScreen(
         }
     }
 
+    showJuzUnlockDialog?.let { juzNumber ->
+        AlertDialog(
+            onDismissRequest = { showJuzUnlockDialog = null },
+            icon = { Icon(Icons.Default.Lock, contentDescription = null, tint = GoldAccent) },
+            title = { Text("Unlock Para $juzNumber") },
+            text = { Text("Watch one short rewarded video to unlock this complete para permanently. You will not need to watch again for this para.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showJuzUnlockDialog = null
+                        val activity = context as? Activity
+                        if (activity != null) {
+                            UnityAdsManager.showRewarded(
+                                activity = activity,
+                                onRewardEarned = {
+                                    viewModel.unlockJuz(juzNumber)
+                                    viewModel.selectJuz(juzNumber, justUnlocked = true)
+                                },
+                                onUnavailable = { }
+                            )
+                        }
+                    }
+                ) { Text("Watch Ad & Unlock") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showJuzUnlockDialog = null }) { Text("Not now") }
+            }
+        )
+    }
 }
 
 @Composable
