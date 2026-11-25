@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.data.repository.BabyName
 import com.example.data.repository.BabyNameGender
 import com.example.data.repository.BabyNamesRepository
 
@@ -26,9 +25,9 @@ fun BabyNamesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
    Text("Muslim Baby Names", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
   }
   Row(Modifier.padding(horizontal = 12.dp)) {
-   FilterChip(gender == BabyNameGender.BOY, { gender = BabyNameGender.BOY }, label = { Text("लड़के (250)") })
+   FilterChip(gender == BabyNameGender.BOY, { gender = BabyNameGender.BOY }, label = { Text("लड़के (${BabyNamesRepository.boys.size})") })
    Spacer(Modifier.width(8.dp))
-   FilterChip(gender == BabyNameGender.GIRL, { gender = BabyNameGender.GIRL }, label = { Text("लड़कियाँ (250)") })
+   FilterChip(gender == BabyNameGender.GIRL, { gender = BabyNameGender.GIRL }, label = { Text("लड़कियाँ (${BabyNamesRepository.girls.size})") })
   }
   OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth().padding(12.dp).testTag("baby_names_search"), label = { Text("नाम या अर्थ खोजें") }, singleLine = true)
   Text("${shown.size} नाम मिले", Modifier.padding(horizontal = 16.dp))
