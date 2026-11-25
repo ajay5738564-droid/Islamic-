@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.data.model.AsrJuristic
 import com.example.data.model.CalculationMethod
@@ -59,6 +60,7 @@ class UserPreferencesRepository(private val context: Context) {
         val AZAN_VOICE = stringPreferencesKey("azan_voice")
         val REWARDED_SUPPORTER_STATUS = booleanPreferencesKey("rewarded_supporter_status")
         val REWARD_POINTS = intPreferencesKey("user_reward_points")
+        val UNLOCKED_QURAN_JUZ = stringSetPreferencesKey("unlocked_quran_juz")
 
         fun prayerKey(dateStr: String, prayer: PrayerName) = booleanPreferencesKey("prayer_${dateStr}_${prayer.name}")
         fun alarmKey(prayer: PrayerName) = booleanPreferencesKey("alarm_${prayer.name}")
@@ -214,6 +216,18 @@ class UserPreferencesRepository(private val context: Context) {
                 maghribDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.MAGHRIB)] ?: false,
                 ishaDone = prefs[PreferencesKeys.prayerKey(dateStr, PrayerName.ISHA)] ?: false
             )
+        }
+    }
+
+    val unlockedQuranJuzFlow: Flow<Set<Int>> = context.dataStore.data.map { prefs ->
+        (prefs[PreferencesKeys.UNLOCKED_QURAN_JUZ] ?: emptySet()).mapNotNull { it.toIntOrNull() }.toSet() + 1
+    }
+
+    suspend fun unlockQuranJuz(juzNumber: Int) {
+        require(juzNumber in 2..30)
+        context.dataStore.edit { prefs ->
+            val current = prefs[PreferencesKeys.UNLOCKED_QURAN_JUZ] ?: emptySet()
+            prefs[PreferencesKeys.UNLOCKED_QURAN_JUZ] = current + juzNumber.toString()
         }
     }
 
