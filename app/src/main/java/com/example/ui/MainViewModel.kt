@@ -311,8 +311,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadAyahsForSurah(surah.number)
     }
 
-    fun selectJuz(juzNumber: Int) {
-        if (!isJuzUnlocked(juzNumber)) return
+    fun selectJuz(juzNumber: Int, justUnlocked: Boolean = false) {
+        if (!justUnlocked && !isJuzUnlocked(juzNumber)) return
         _selectedSurah.value = null
         _selectedJuz.value = juzNumber
         viewModelScope.launch {
