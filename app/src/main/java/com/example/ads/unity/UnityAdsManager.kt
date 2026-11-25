@@ -30,7 +30,7 @@ object UnityAdsManager {
 
     @Synchronized
     fun initialize(context: Context) {
-        if (initialized || UnityAds.isInitialized()) {
+        if (initialized || UnityAds.isInitialized) {
             initialized = true
             preloadInterstitial()
             preloadRewarded()
