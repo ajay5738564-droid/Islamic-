@@ -74,6 +74,7 @@ enum class ExploreSubScreen {
     NAMAZ_GUIDE,
     NAAT_PLAYER,
     NAMES_OF_ALLAH,
+    BABY_NAMES,
     AZAN_SETTINGS,
     DUA_LIST,
     HADITH_LIST,
