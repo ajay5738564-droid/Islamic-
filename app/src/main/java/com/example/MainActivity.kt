@@ -138,17 +138,17 @@ fun DeenovaApp(
                     currentLanguage = currentLanguage,
                     onTabSelected = { tab ->
                         // Interstitials appear only occasionally at a natural Explore -> Home transition.
-                        if (tab != currentTab) {
-                            val safeTransition =
-                                currentTab != NavigationTab.QURAN &&
-                                tab != NavigationTab.QURAN &&
-                                currentTab != NavigationTab.PRAYER &&
-                                tab != NavigationTab.PRAYER
-                            if (safeTransition) {
-                                exploreReturnCount += 1
-                                if (exploreReturnCount % 5 == 0) {
-                                    activity?.let { UnityAdsManager.showInterstitial(it) }
-                                }
+                        // Show an interstitial only occasionally when returning to Home.
+                        // Never interrupt Quran or Prayer navigation.
+                        if (
+                            tab == NavigationTab.HOME &&
+                            currentTab != NavigationTab.HOME &&
+                            currentTab != NavigationTab.QURAN &&
+                            currentTab != NavigationTab.PRAYER
+                        ) {
+                            exploreReturnCount += 1
+                            if (exploreReturnCount % 5 == 0) {
+                                activity?.let { UnityAdsManager.showInterstitial(it) }
                             }
                         }
                         viewModel.setTab(tab)
