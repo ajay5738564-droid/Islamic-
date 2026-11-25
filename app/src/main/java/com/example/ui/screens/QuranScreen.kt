@@ -52,6 +52,7 @@ fun QuranScreen(
     val currentPlayingAyah by viewModel.currentPlayingAyah.collectAsState()
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
     val currentLanguage by viewModel.appLanguage.collectAsState()
+    val readableAyahs = remember(ayahs, unlockedJuz, selectedJuz) { if (selectedJuz != null) ayahs.filter { it.juz == selectedJuz } else ayahs.filter { it.juz == 1 || it.juz in unlockedJuz } }
 
     var selectedTab by remember { mutableStateOf(0) } // 0: Surah List, 1: Juz List
 
@@ -149,7 +150,7 @@ fun QuranScreen(
                         }
                     }
 
-                    items(ayahs, key = { it.number }) { ayah ->
+                    items(readableAyahs, key = { it.number }) { ayah ->
                         val isPlaying = currentPlayingAyah?.number == ayah.number
                         val isBookmarked = viewModel.isItemBookmarked("ayah_${ayah.number}")
 
@@ -296,7 +297,7 @@ fun QuranScreen(
                         SurahListItemCard(
                             surah = surah,
                             onClick = {
-                                viewModel.selectSurah(surah)
+                                if (viewModel.isJuzUnlocked(surah.startingJuz)) viewModel.selectSurah(surah) else showJuzUnlockDialog = surah.startingJuz
                             }
                         )
                     }
