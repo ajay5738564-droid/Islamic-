@@ -71,7 +71,7 @@ class UserPreferencesRepository(private val context: Context) {
     val notifyAsrFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.ASR)] ?: true }
     val notifyMaghribFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.MAGHRIB)] ?: true }
     val notifyIshaFlow: Flow<Boolean> = context.dataStore.data.map { it[PreferencesKeys.alarmKey(PrayerName.ISHA)] ?: true }
-    val azanVoiceFlow: Flow<String> = context.dataStore.data.map { it[PreferencesKeys.AZAN_VOICE] ?: "Makkah" }
+    val azanVoiceFlow: Flow<String> = context.dataStore.data.map { it[PreferencesKeys.AZAN_VOICE] ?: "Madinah" }
 
     suspend fun togglePrayerAlarm(prayer: PrayerName) {
         context.dataStore.edit { prefs ->
