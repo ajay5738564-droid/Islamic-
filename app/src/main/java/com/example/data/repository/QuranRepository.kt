@@ -265,6 +265,48 @@ object QuranRepository {
         }
     }
 
+    suspend fun getJuzAyahs(juzNumber: Int): List<Ayah> {
+        return withContext(Dispatchers.IO) {
+            require(juzNumber in 1..30) { "Juz number must be between 1 and 30" }
+            try {
+                val url = URL("https://api.alquran.cloud/v1/juz/$juzNumber/editions/quran-uthmani,en.sahih")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = 10000
+                conn.readTimeout = 15000
+                conn.requestMethod = "GET"
+                if (conn.responseCode != 200) return@withContext emptyList()
+                val root = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                val data = root.getJSONArray("data")
+                val arabicAyahs = data.getJSONObject(0).getJSONArray("ayahs")
+                val englishAyahs = data.getJSONObject(1).getJSONArray("ayahs")
+                val result = mutableListOf<Ayah>()
+                for (i in 0 until arabicAyahs.length()) {
+                    val ar = arabicAyahs.getJSONObject(i)
+                    val en = englishAyahs.getJSONObject(i)
+                    val surahNumber = ar.getJSONObject("surah").getInt("number")
+                    val numberInSurah = ar.getInt("numberInSurah")
+                    val s = String.format("%03d", surahNumber)
+                    val a = String.format("%03d", numberInSurah)
+                    result.add(
+                        Ayah(
+                            number = ar.getInt("number"),
+                            surahNumber = surahNumber,
+                            numberInSurah = numberInSurah,
+                            textArabic = ar.getString("text"),
+                            textEnglish = en.getString("text"),
+                            juz = ar.optInt("juz", juzNumber),
+                            audioUrl = "https://everyayah.com/data/Alafasy_128kbps/$s$a.mp3"
+                        )
+                    )
+                }
+                result
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emptyList()
+            }
+        }
+    }
+
     private fun fetchSurahFromApi(surahNumber: Int): List<Ayah> {
         val surahInfo = ALL_114_SURAHS.find { it.number == surahNumber }
         val sNumFormatted = String.format("%03d", surahNumber)
