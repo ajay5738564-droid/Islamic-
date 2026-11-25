@@ -7,7 +7,6 @@ import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAds
-import com.unity3d.ads.UnityAdsLoadOptions
 import com.unity3d.ads.UnityAdsShowOptions
 
 /**
@@ -65,7 +64,7 @@ object UnityAdsManager {
     fun preloadInterstitial() {
         if (!initialized || interstitialReady || interstitialLoading) return
         interstitialLoading = true
-        UnityAds.load(INTERSTITIAL_PLACEMENT, UnityAdsLoadOptions(), object : IUnityAdsLoadListener {
+        UnityAds.load(INTERSTITIAL_PLACEMENT, object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String) {
                 interstitialLoading = false
                 interstitialReady = true
@@ -120,7 +119,7 @@ object UnityAdsManager {
     fun preloadRewarded() {
         if (!initialized || rewardedReady || rewardedLoading) return
         rewardedLoading = true
-        UnityAds.load(REWARDED_PLACEMENT, UnityAdsLoadOptions(), object : IUnityAdsLoadListener {
+        UnityAds.load(REWARDED_PLACEMENT, object : IUnityAdsLoadListener {
             override fun onUnityAdsAdLoaded(placementId: String) {
                 rewardedLoading = false
                 rewardedReady = true
