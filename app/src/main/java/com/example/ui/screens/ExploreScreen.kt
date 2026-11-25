@@ -269,8 +269,6 @@ fun ExploreMainMenu(
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.SOURCES) }
                 )
 
-                // Unity Banner Ad
-                com.example.ads.unity.UnityBannerAd()
             }
         }
     }
