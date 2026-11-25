@@ -1,5 +1,10 @@
 package com.example.ui.screens
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.ads.unity.UnityAdsManager
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +38,7 @@ fun SettingsScreen(
     onOpenLanguagePicker: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val currentLanguage by viewModel.appLanguage.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
@@ -312,6 +318,36 @@ fun SettingsScreen(
                 icon = Icons.Default.Bookmark,
                 testTag = "setting_bookmarks_item",
                 onClick = onOpenBookmarks
+            )
+        }
+
+        // Optional rewarded placement: user explicitly chooses to watch.
+        item {
+            SettingsItemCard(
+                title = when (currentLanguage) {
+                    AppLanguage.URDU -> "اشتہار دیکھ کر ایپ کی مدد کریں"
+                    AppLanguage.HINDI -> "विज्ञापन देखकर ऐप को सपोर्ट करें"
+                    else -> "Support the App (Optional Reward)"
+                },
+                subtitle = when (currentLanguage) {
+                    AppLanguage.URDU -> "ویڈیو مکمل دیکھنے پر 100 سپورٹر پوائنٹس"
+                    AppLanguage.HINDI -> "वीडियो पूरा देखने पर 100 सपोर्टर पॉइंट्स"
+                    else -> "Earn 100 supporter points after completing an optional video"
+                },
+                icon = Icons.Default.CardGiftcard,
+                testTag = "unity_rewarded_ad",
+                onClick = {
+                    val activity = context as? Activity
+                    if (activity != null) {
+                        UnityAdsManager.showRewarded(
+                            activity = activity,
+                            onRewardEarned = { viewModel.claimAdReward(100) },
+                            onUnavailable = {
+                                Toast.makeText(context, "Rewarded video is not ready yet. Please try again shortly.", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                }
             )
         }
 
