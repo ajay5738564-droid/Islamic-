@@ -52,7 +52,7 @@ fun QuranScreen(
     val currentPlayingAyah by viewModel.currentPlayingAyah.collectAsState()
     val arabicFontSize by viewModel.arabicFontSize.collectAsState()
     val currentLanguage by viewModel.appLanguage.collectAsState()
-    val readableAyahs = remember(ayahs, unlockedJuz, selectedJuz) { if (selectedJuz != null) ayahs.filter { it.juz == selectedJuz } else ayahs.filter { it.juz == 1 || it.juz in unlockedJuz } }
+    val readableAyahs = remember(ayahs, unlockedJuz, selectedJuz) { if (selectedJuz != null) ayahs else ayahs.filter { it.juz == 1 || it.juz in unlockedJuz } }
 
     var selectedTab by remember { mutableStateOf(0) } // 0: Surah List, 1: Juz List
 
@@ -114,6 +114,18 @@ fun QuranScreen(
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else if (readableAyahs.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "इस पारे की आयतें अभी लोड नहीं हो पाईं। इंटरनेट कनेक्शन जाँचकर वापस जाएँ और दोबारा खोलें।",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
                 }
             } else {
                 LazyColumn(
