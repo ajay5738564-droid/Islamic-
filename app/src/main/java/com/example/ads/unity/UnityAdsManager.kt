@@ -11,7 +11,8 @@ import com.unity3d.ads.UnityAdsShowOptions
 
 /**
  * Direct Unity Ads integration for the Android app.
- * Test mode stays enabled until a compliant consent flow and store disclosures are configured.
+ * Production mode requests live inventory using the configured Unity Game ID and placements.
+ * Ensure privacy consent and store disclosures are completed for all target regions.
  */
 object UnityAdsManager {
     const val GAME_ID = "800365917"
@@ -20,7 +21,7 @@ object UnityAdsManager {
     const val REWARDED_PLACEMENT = "BP_Rewarded_Android"
 
     private const val TAG = "UnityAdsManager"
-    private const val TEST_MODE = true
+    private const val TEST_MODE = false
 
     @Volatile private var initialized = false
     @Volatile private var interstitialReady = false
