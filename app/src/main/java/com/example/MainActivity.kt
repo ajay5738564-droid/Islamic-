@@ -1,5 +1,7 @@
 package com.example
 
+import com.example.ads.unity.UnityAdsManager
+import com.example.ads.unity.UnityBannerAd
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        UnityAdsManager.initialize(applicationContext)
         enableEdgeToEdge()
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
@@ -75,6 +78,7 @@ fun DeenovaApp(
     var showBookmarks by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var exploreReturnCount by remember { mutableIntStateOf(0) }
 
     // Step-by-step Back Press Handler
     BackHandler(enabled = true) {
@@ -121,13 +125,29 @@ fun DeenovaApp(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
-            DeenovaBottomNavigation(
-                selectedTab = currentTab,
-                currentLanguage = currentLanguage,
-                onTabSelected = { tab ->
-                    viewModel.setTab(tab)
+            Column {
+                // Keep banners away from Quran and prayer screens.
+                if (currentTab == NavigationTab.HOME ||
+                    currentTab == NavigationTab.EXPLORE ||
+                    currentTab == NavigationTab.MORE
+                ) {
+                    UnityBannerAd()
                 }
-            )
+                DeenovaBottomNavigation(
+                    selectedTab = currentTab,
+                    currentLanguage = currentLanguage,
+                    onTabSelected = { tab ->
+                        // Interstitials appear only occasionally at a natural Explore -> Home transition.
+                        if (currentTab == NavigationTab.EXPLORE && tab == NavigationTab.HOME) {
+                            exploreReturnCount += 1
+                            if (exploreReturnCount % 3 == 0) {
+                                activity?.let { UnityAdsManager.showInterstitial(it) }
+                            }
+                        }
+                        viewModel.setTab(tab)
+                    }
+                )
+            }
         }
     ) { innerPadding ->
         Box(
