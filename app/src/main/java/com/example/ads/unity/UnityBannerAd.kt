@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.unity3d.ads.banner.BannerView
-import com.unity3d.ads.banner.UnityBannerSize
+import com.unity3d.services.banners.BannerView
+import com.unity3d.services.banners.UnityBannerSize
 
 @Composable
 fun UnityBannerAd() {
