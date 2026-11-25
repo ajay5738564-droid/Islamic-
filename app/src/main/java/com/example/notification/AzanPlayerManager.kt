@@ -38,7 +38,7 @@ object AzanPlayerManager {
     @Synchronized
     fun playAzan(
         context: Context,
-        voiceId: String = "Makkah",
+        voiceId: String = "Madinah",
         prayerName: String = "نماز",
         isFajr: Boolean = false,
         onCompletion: () -> Unit = {}
