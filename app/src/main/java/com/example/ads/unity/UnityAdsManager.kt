@@ -27,6 +27,8 @@ object UnityAdsManager {
     @Volatile private var rewardedReady = false
     @Volatile private var interstitialLoading = false
     @Volatile private var rewardedLoading = false
+    @Volatile private var lastInterstitialShownAt = 0L
+    private const val INTERSTITIAL_COOLDOWN_MS = 10 * 60 * 1000L
 
     @Synchronized
     fun initialize(context: Context) {
@@ -84,6 +86,8 @@ object UnityAdsManager {
     }
 
     fun showInterstitial(activity: Activity, onFinished: (() -> Unit)? = null) {
+        val now = System.currentTimeMillis()
+        if (now - lastInterstitialShownAt < INTERSTITIAL_COOLDOWN_MS) return
         if (!initialized || !interstitialReady) {
             preloadInterstitial()
             onFinished?.invoke()
@@ -91,6 +95,7 @@ object UnityAdsManager {
         }
 
         interstitialReady = false
+        lastInterstitialShownAt = now
         UnityAds.show(activity, INTERSTITIAL_PLACEMENT, UnityAdsShowOptions(), object : IUnityAdsShowListener {
             override fun onUnityAdsShowFailure(
                 placementId: String,
