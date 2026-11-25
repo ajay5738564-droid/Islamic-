@@ -110,6 +110,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Quran State
     private val _selectedSurah = MutableStateFlow<Surah?>(null)
     val selectedSurah: StateFlow<Surah?> = _selectedSurah.asStateFlow()
+    private val _selectedJuz = MutableStateFlow<Int?>(null)
+    val selectedJuz: StateFlow<Int?> = _selectedJuz.asStateFlow()
 
     private val _currentSurahAyahs = MutableStateFlow<List<Ayah>>(emptyList())
     val currentSurahAyahs: StateFlow<List<Ayah>> = _currentSurahAyahs.asStateFlow()
@@ -206,6 +208,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val themeMode = preferences.themeModeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
     val isSupporter = preferences.supporterStatusFlow.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val rewardPoints = preferences.rewardPointsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+    val unlockedQuranJuz = preferences.unlockedQuranJuzFlow.stateIn(viewModelScope, SharingStarted.Eagerly, setOf(1))
+
+    fun isJuzUnlocked(juzNumber: Int): Boolean = juzNumber == 1 || juzNumber in unlockedQuranJuz.value
+
+    fun unlockJuz(juzNumber: Int) {
+        viewModelScope.launch { preferences.unlockQuranJuz(juzNumber) }
+    }
 
     fun claimAdReward(points: Int = 100) {
         viewModelScope.launch {
@@ -297,12 +306,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectSurah(surah: Surah) {
+        _selectedJuz.value = null
         _selectedSurah.value = surah
         loadAyahsForSurah(surah.number)
     }
 
+    fun selectJuz(juzNumber: Int) {
+        if (!isJuzUnlocked(juzNumber)) return
+        _selectedSurah.value = null
+        _selectedJuz.value = juzNumber
+        viewModelScope.launch {
+            _isSurahLoading.value = true
+            _currentSurahAyahs.value = QuranRepository.getJuzAyahs(juzNumber)
+            _isSurahLoading.value = false
+        }
+    }
+
     fun clearSelectedSurah() {
         _selectedSurah.value = null
+        _selectedJuz.value = null
         _currentSurahAyahs.value = emptyList()
         stopAudio()
     }
