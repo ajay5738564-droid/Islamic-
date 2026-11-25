@@ -27,7 +27,7 @@ object AzanAlarmScheduler {
             PrayerName.MAGHRIB,
             PrayerName.ISHA
         ),
-        azanVoice: String = "Makkah"
+        azanVoice: String = "Madinah"
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
