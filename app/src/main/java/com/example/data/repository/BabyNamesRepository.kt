@@ -62,16 +62,16 @@ object BabyNamesRepository {
 "Iqra|पढ़ो",
 "Laiba|जन्नत से जुड़ा नाम",
 "Nawal|उपहार")
- private val gs=listOf("Noor|रोशनी",
-"Fatima|संयमी",
-"Ayesha|जीवंत",
-"Zahra|चमकदार",
-"Saba|सुबह की हवा",
-"Maryam|पवित्रता",
-"Sana|प्रशंसा",
-"Haya|शालीनता",
-"Jahan|दुनिया",
-"Bano|सम्मानित महिला")
+ private val gs=listOf("Hoor|जन्नत की सुंदरता से जुड़ा नाम",
+"Yasmin|चमेली का फूल",
+"Rida|संतोष, प्रसन्नता",
+"Iman|आस्था, विश्वास",
+"Khadija|सम्मानित ऐतिहासिक इस्लामी नाम",
+"Dua|प्रार्थना",
+"Saira|यात्रा करने वाली",
+"Fariha|खुश, प्रसन्न",
+"Inara|रोशनी, प्रकाश",
+"Muneera|प्रकाशमान")
  private fun p(s:String):Pair<String,String>{val a=s.split("|",limit=2);return a[0] to a.getOrElse(1){""}}
  val boys=bf.flatMap{a->bs.map{b->val(n,m)=p(a);val(x,y)=p(b);BabyName("$n $x","$m; $y",BabyNameGender.BOY)}}
  val girls=gf.flatMap{a->gs.map{b->val(n,m)=p(a);val(x,y)=p(b);BabyName("$n $x","$m; $y",BabyNameGender.GIRL)}}
