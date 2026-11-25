@@ -67,6 +67,7 @@ fun ExploreScreen(
         ExploreSubScreen.NAMAZ_GUIDE -> NamazGuideScreen(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.NAAT_PLAYER -> NaatPlayerScreen(viewModel = viewModel, onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
         ExploreSubScreen.NAMES_OF_ALLAH -> NamesOfAllahScreen(onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
+        ExploreSubScreen.BABY_NAMES -> BabyNamesScreen(onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
         ExploreSubScreen.AZAN_SETTINGS -> AzanSettingsScreen(viewModel = viewModel, onBack = { viewModel.setExploreSubScreen(ExploreSubScreen.MAIN_MENU) }, modifier = modifier)
         ExploreSubScreen.DUA_LIST -> DuaExplorerView(viewModel = viewModel, modifier = modifier)
         ExploreSubScreen.HADITH_LIST -> HadithExplorerView(viewModel = viewModel, modifier = modifier)
@@ -142,6 +143,14 @@ fun ExploreMainMenu(
                     icon = Icons.Default.Headphones,
                     testTag = "explore_item_naat_player",
                     onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.NAAT_PLAYER) }
+                )
+
+                ExploreFeatureCard(
+                    title = "مسلم بچوں کے नाम (500)",
+                    subtitle = "250 लड़कों और 250 लड़कियों के नाम, अर्थ और खोज",
+                    icon = Icons.Default.ChildCare,
+                    testTag = "explore_item_baby_names",
+                    onClick = { viewModel.setExploreSubScreen(ExploreSubScreen.BABY_NAMES) }
                 )
 
                 // 99 Names of Allah Card
