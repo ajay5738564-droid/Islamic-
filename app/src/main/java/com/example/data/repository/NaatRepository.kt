@@ -75,7 +75,7 @@ object NaatRepository {
             artistEnglish = "Qari Waheed Zafar Qasmi",
             category = NaatCategory.NAAT,
             duration = "06:45",
-            audioUrl = "https://server8.mp3quran.net/afs/001.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "فاصلوں کو تکلّف ہے ہم سے اگر، ہم بھی بے بس نہیں ہیں، بے کس نہیں",
                 "ان کو پہنچیں گے ہم بھی دعا کے لیے، اپنے دل کو مدینہ بنا لیں گے ہم",
@@ -84,7 +84,7 @@ object NaatRepository {
                 "ان کا روضہ نگاہوں میں بس جائے گا، روح پر ان کا فیضان چھا جائے گا",
                 "یا رسولَ اللہ تیری رحمت کی قسم، کوئی مایوس تیرے در سے نہیں لوٹتا"
             ),
-            descriptionUrdu = "عظیم الشان اور دل کو چھو لینے والا لازوال نعتیہ کلام",
+            descriptionUrdu = "نعت کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = true
         ),
         NaatItem(
@@ -95,7 +95,7 @@ object NaatRepository {
             artistEnglish = "Ala Hazrat Imam Ahmad Raza Khan",
             category = NaatCategory.SALAM,
             duration = "08:12",
-            audioUrl = "https://server8.mp3quran.net/afs/036.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "مصطفیٰ جانِ رحمت پہ لاکھوں سلام",
                 "شمعِ بزمِ ہدایت پہ لاکھوں سلام",
@@ -108,7 +108,7 @@ object NaatRepository {
                 "مجھ سے بے کس پہ بھی ہو عنایت کی نظر",
                 "یا شفیعَ الوریٰ تجھ پہ لاکھوں سلام"
             ),
-            descriptionUrdu = "عالمِ اسلام کا مشہور ترین اور مقبول درود و سلام",
+            descriptionUrdu = "سلام کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = true
         ),
         NaatItem(
@@ -119,7 +119,7 @@ object NaatRepository {
             artistEnglish = "Muzaffar Warsi",
             category = NaatCategory.HAMD,
             duration = "07:30",
-            audioUrl = "https://server8.mp3quran.net/afs/055.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "کوئی تو ہے جو نظامِ ہستی چلا رہا ہے، وہی خدا ہے",
                 "دکھائی بھی جو نہ دے نظر بھی جو آ رہا ہے، وہی خدا ہے",
@@ -130,7 +130,7 @@ object NaatRepository {
                 "وہی ہے مشرق، وہی ہے مغرب، سفر کریں سب اسی کی جانب",
                 "سبھی کا رستہ، سبھی کا رہبر، وہی خدا ہے، وہی خدا ہے"
             ),
-            descriptionUrdu = "اللہ تعالیٰ کی توحید اور شانِ کبریائی کا شاہکار حمدیہ کلام",
+            descriptionUrdu = "حمد کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = true
         ),
         NaatItem(
@@ -141,7 +141,7 @@ object NaatRepository {
             artistEnglish = "Sabri Brothers / Atif Aslam",
             category = NaatCategory.NAAT,
             duration = "09:40",
-            audioUrl = "https://server8.mp3quran.net/afs/067.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "قسمت میں میری چین سے جینا لکھ دے",
                 "ڈوبے نہ کبھی میرا سفینہ لکھ دے",
@@ -155,7 +155,7 @@ object NaatRepository {
                 "آپ کے در پہ فریاد لائے ہیں ہم",
                 "نگاہِ کرم یا رسولَ اللہ، نگاہِ کرم یا حبیبَ اللہ"
             ),
-            descriptionUrdu = "عقیدت و محبت سے لبریز بے مثال نعتیہ کلام",
+            descriptionUrdu = "نعت کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = true
         ),
         NaatItem(
@@ -166,7 +166,7 @@ object NaatRepository {
             artistEnglish = "Junaid Jamshed",
             category = NaatCategory.NAAT,
             duration = "05:15",
-            audioUrl = "https://server8.mp3quran.net/afs/112.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "جس نے دنیا سنواری، وہ میرا نبی ہے",
                 "جس کی سیرت ہے پیاری، وہ میرا نبی ہے",
@@ -179,7 +179,7 @@ object NaatRepository {
                 "صلّی اللہ علیک یا رسولَ اللہ",
                 "صلّی اللہ علیک یا حبیبَ اللہ"
             ),
-            descriptionUrdu = "خوبصورت اور دلنشین آواز میں نبی پاک ﷺ کی مدح سرائی",
+            descriptionUrdu = "نعت کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = true
         ),
         NaatItem(
@@ -190,7 +190,7 @@ object NaatRepository {
             artistEnglish = "Maher Zain",
             category = NaatCategory.SALAM,
             duration = "04:55",
-            audioUrl = "https://server8.mp3quran.net/afs/113.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "أنت نور الله فجراً، جئت بعد العسر يسراً",
                 "ربنا أعلاك قدراً، يا إمام الأنبياء",
@@ -201,7 +201,7 @@ object NaatRepository {
                 "آپ کی رحمتیں ہم پہ ہر پل رہیں",
                 "آپ کے نقشِ پا پہ ہم چلتے رہیں"
             ),
-            descriptionUrdu = "بین الاقوامی سطح پر مقبول عربی و اردو سلام",
+            descriptionUrdu = "سلام کا عنوان شامل ہے؛ مستند اور اجازت یافتہ آڈیو ریکارڈنگ ابھی دستیاب نہیں",
             isFeatured = false
         ),
         NaatItem(
@@ -212,7 +212,7 @@ object NaatRepository {
             artistEnglish = "Qari Waheed Zafar Qasmi",
             category = NaatCategory.MANQABAT,
             duration = "06:10",
-            audioUrl = "https://server8.mp3quran.net/afs/114.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "الٰہی میں تجھ سے دعا مانگتا ہوں",
                 "کرم مانگتا ہوں، عطا مانگتا ہوں",
@@ -234,7 +234,7 @@ object NaatRepository {
             artistEnglish = "Owais Raza Qadri",
             category = NaatCategory.NAAT,
             duration = "07:20",
-            audioUrl = "https://server8.mp3quran.net/afs/108.mp3",
+            audioUrl = "",
             lyricsUrdu = listOf(
                 "شہرِ نبی کی رونقیں کیا خوب ہیں",
                 "ہر دل کے وہ تو پیارے محبوب ہیں",
