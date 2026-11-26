@@ -268,25 +268,56 @@ object QuranRepository {
     suspend fun getJuzAyahs(juzNumber: Int): List<Ayah> {
         return withContext(Dispatchers.IO) {
             require(juzNumber in 1..30) { "Juz number must be between 1 and 30" }
+
+            // Fetch each edition separately. The combined-editions endpoint can fail on
+            // some networks/CDN responses; separate requests provide a reliable fallback.
+            fun fetchEdition(edition: String): JSONArray? {
+                val url = URL("https://api.alquran.cloud/v1/juz/$juzNumber/$edition")
+                val conn = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 20000
+                    readTimeout = 25000
+                    requestMethod = "GET"
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("User-Agent", "Deenova-Android")
+                    instanceFollowRedirects = true
+                }
+                return try {
+                    val code = conn.responseCode
+                    if (code != HttpURLConnection.HTTP_OK) {
+                        val error = conn.errorStream?.bufferedReader()?.use { it.readText() }
+                        android.util.Log.w("QuranRepository", "Juz API returned HTTP $code: $error")
+                        null
+                    } else {
+                        val root = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                        if (root.optInt("code", 200) != 200) null
+                        else root.optJSONObject("data")?.optJSONArray("ayahs")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.w("QuranRepository", "Failed to fetch Juz $juzNumber edition $edition", e)
+                    null
+                } finally {
+                    conn.disconnect()
+                }
+            }
+
             try {
-                val url = URL("https://api.alquran.cloud/v1/juz/$juzNumber/editions/quran-uthmani,en.sahih")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.connectTimeout = 10000
-                conn.readTimeout = 15000
-                conn.requestMethod = "GET"
-                if (conn.responseCode != 200) return@withContext emptyList()
-                val root = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
-                val data = root.getJSONArray("data")
-                val arabicAyahs = data.getJSONObject(0).getJSONArray("ayahs")
-                val englishAyahs = data.getJSONObject(1).getJSONArray("ayahs")
-                val result = mutableListOf<Ayah>()
+                val arabicAyahs = fetchEdition("quran-uthmani")
+                val englishAyahs = fetchEdition("en.sahih")
+                if (arabicAyahs == null || englishAyahs == null || arabicAyahs.length() == 0 ||
+                    arabicAyahs.length() != englishAyahs.length()) {
+                    android.util.Log.e("QuranRepository", "Incomplete Juz $juzNumber response")
+                    return@withContext emptyList()
+                }
+
+                val result = ArrayList<Ayah>(arabicAyahs.length())
                 for (i in 0 until arabicAyahs.length()) {
                     val ar = arabicAyahs.getJSONObject(i)
                     val en = englishAyahs.getJSONObject(i)
                     val surahNumber = ar.getJSONObject("surah").getInt("number")
                     val numberInSurah = ar.getInt("numberInSurah")
-                    val s = String.format("%03d", surahNumber)
-                    val a = String.format("%03d", numberInSurah)
+                    val surahInfo = ALL_114_SURAHS.find { it.number == surahNumber }
+                    val s = String.format(Locale.US, "%03d", surahNumber)
+                    val a = String.format(Locale.US, "%03d", numberInSurah)
                     result.add(
                         Ayah(
                             number = ar.getInt("number"),
@@ -294,6 +325,9 @@ object QuranRepository {
                             numberInSurah = numberInSurah,
                             textArabic = ar.getString("text"),
                             textEnglish = en.getString("text"),
+                            textHindi = "",
+                            textUrdu = "",
+                            transliteration = "",
                             juz = ar.optInt("juz", juzNumber),
                             audioUrl = "https://everyayah.com/data/Alafasy_128kbps/$s$a.mp3"
                         )
@@ -301,7 +335,7 @@ object QuranRepository {
                 }
                 result
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("QuranRepository", "Unable to load Juz $juzNumber", e)
                 emptyList()
             }
         }
