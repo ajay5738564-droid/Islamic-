@@ -27,7 +27,7 @@ fun UnityBannerAd() {
     }
 
     DisposableEffect(banner) {
-        banner.load()
+        UnityAdsManager.loadBannerWhenReady(banner)
         onDispose { banner.destroy() }
     }
 
