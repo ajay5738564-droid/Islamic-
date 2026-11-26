@@ -265,9 +265,17 @@ object QuranRepository {
         }
     }
 
-    suspend fun getJuzAyahs(juzNumber: Int): List<Ayah> {
+    suspend fun getJuzAyahs(database: DeenovaDatabase, juzNumber: Int): List<Ayah> {
         return withContext(Dispatchers.IO) {
             require(juzNumber in 1..30) { "Juz number must be between 1 and 30" }
+
+            val cached = database.offlineAyahDao().getAyahsForJuz(juzNumber)
+            if (cached.isNotEmpty()) {
+                return@withContext cached.map {
+                    Ayah(it.numberGlobal, it.surahNumber, it.numberInSurah, it.textArabic,
+                        it.textEnglish, it.textHindi, it.textUrdu, it.transliteration, it.juz, it.audioUrl)
+                }
+            }
 
             // Fetch each edition separately. The combined-editions endpoint can fail on
             // some networks/CDN responses; separate requests provide a reliable fallback.
@@ -333,10 +341,29 @@ object QuranRepository {
                         )
                     )
                 }
+                database.offlineAyahDao().insertAyahs(result.map {
+                    OfflineAyahEntity(it.surahNumber, it.numberInSurah, it.number, it.textArabic,
+                        it.textEnglish, it.textHindi, it.textUrdu, it.transliteration, it.juz, it.audioUrl)
+                })
                 result
             } catch (e: Exception) {
                 android.util.Log.e("QuranRepository", "Unable to load Juz $juzNumber", e)
                 emptyList()
+            }
+        }
+    }
+
+    suspend fun cacheAllJuzForOffline(database: DeenovaDatabase) {
+        withContext(Dispatchers.IO) {
+            for (juz in 1..30) {
+                try {
+                    if (database.offlineAyahDao().getAyahsForJuz(juz).isEmpty()) {
+                        getJuzAyahs(database, juz)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.w("QuranRepository", "Offline cache paused at Juz $juz", e)
+                    break
+                }
             }
         }
     }
