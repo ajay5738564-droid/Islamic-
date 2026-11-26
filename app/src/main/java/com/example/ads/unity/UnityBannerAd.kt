@@ -51,11 +51,12 @@ fun UnityBannerAd(reloadKey: Int = 0) {
     }
 
     AndroidView(
-        factory = { view ->
-            view.post {
-                if (view.isAttachedToWindow) UnityAdsManager.loadBannerWhenReady(view)
+        factory = { _ ->
+            banner.also { view ->
+                view.post {
+                    if (view.isAttachedToWindow) UnityAdsManager.loadBannerWhenReady(view)
+                }
             }
-            view
         },
         modifier = Modifier
             .fillMaxWidth()
