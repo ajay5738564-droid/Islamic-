@@ -126,13 +126,8 @@ fun DeenovaApp(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
             Column {
-                // Keep banners away from Quran and prayer screens.
-                if (currentTab == NavigationTab.HOME ||
-                    currentTab == NavigationTab.EXPLORE ||
-                    currentTab == NavigationTab.MORE
-                ) {
-                    UnityBannerAd()
-                }
+                // Keep the banner slot visible on every screen; Unity serves ads only when online inventory is available.
+                UnityBannerAd()
                 DeenovaBottomNavigation(
                     selectedTab = currentTab,
                     currentLanguage = currentLanguage,
