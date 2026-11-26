@@ -187,7 +187,68 @@ object NaatRepository {
             descriptionUrdu = "سفرِ مدینہ اور گنبدِ خضریٰ کے شوق میں لکھی گئی مشہور نعت",
             isFeatured = false
         )
-    )
+    ) + ADDITIONAL_NAATS
+
+
+    // Additional catalogue entries. These are catalogue-only until a verified audio recording is supplied.
+    private val ADDITIONAL_NAATS = listOf(
+        Triple("یا الٰہی ہر جگہ تیری عطا کا ساتھ ہو", "Ya Ilahi Har Jagah Teri Ata Ka Sath Ho", NaatCategory.MANQABAT),
+        Triple("میں سو جاؤں یا مصطفیٰ کہتے کہتے", "Main So Jaun Ya Mustafa Kehte Kehte", NaatCategory.NAAT),
+        Triple("سب سے اولیٰ و اعلیٰ ہمارا نبی", "Sab Se Aala O Aala Hamara Nabi", NaatCategory.NAAT),
+        Triple("وہ کمالِ حسنِ حضور ہے", "Woh Kamal-e-Husn-e-Huzoor Hai", NaatCategory.NAAT),
+        Triple("سرکار کا دربار ہے", "Sarkar Ka Darbar Hai", NaatCategory.NAAT),
+        Triple("مدینے کا سفر ہے اور میں نم دیدہ نم دیدہ", "Madine Ka Safar Hai", NaatCategory.NAAT),
+        Triple("شاہِ مدینہ یثرب کے والی", "Shah-e-Madina Yathrib Ke Wali", NaatCategory.NAAT),
+        Triple("بلغ العلیٰ بکمالہ", "Bala-al-Ula Bi-Kamalihi", NaatCategory.SALAM),
+        Triple("طلع البدر علینا", "Tala-al-Badru Alayna", NaatCategory.SALAM),
+        Triple("درودِ پاک پڑھتے رہو", "Durood-e-Pak Parhte Raho", NaatCategory.SALAM),
+        Triple("یا نبی سلام علیک", "Ya Nabi Salam Alayka (Traditional)", NaatCategory.SALAM),
+        Triple("اے سبز گنبد والے", "Ae Sabz Gumbad Wale", NaatCategory.NAAT),
+        Triple("میرے آقا آؤ کہ مدت ہوئی ہے", "Mere Aaqa Aao Ke Muddat Hui Hai", NaatCategory.NAAT),
+        Triple("وہی خدا ہے", "Wohi Khuda Hai", NaatCategory.HAMD),
+        Triple("لب پہ آتی ہے دعا", "Lab Pe Aati Hai Dua", NaatCategory.HAMD),
+        Triple("اللہ ہو اللہ ہو", "Allah Hu Allah Hu", NaatCategory.HAMD),
+        Triple("تیری ذات پاک ہے", "Teri Zaat Paak Hai", NaatCategory.HAMD),
+        Triple("یا رب العالمین", "Ya Rabbal Aalameen", NaatCategory.HAMD),
+        Triple("میرے آقا کی آمد", "Mere Aaqa Ki Aamad", NaatCategory.NAAT),
+        Triple("نبی نبی یا نبی", "Nabi Nabi Ya Nabi", NaatCategory.NAAT),
+        Triple("مدینے والے سے میرا سلام کہنا", "Madine Wale Se Mera Salam Kehna", NaatCategory.SALAM),
+        Triple("کاش میں مدینے جاتا", "Kaash Main Madine Jata", NaatCategory.NAAT),
+        Triple("شہرِ مدینہ دیکھ لیا", "Shehr-e-Madina Dekh Liya", NaatCategory.NAAT),
+        Triple("دل میں ہو یادِ مدینہ", "Dil Mein Ho Yaad-e-Madina", NaatCategory.NAAT),
+        Triple("مصطفیٰ جانِ رحمت", "Mustafa Jan-e-Rehmat (Salam)", NaatCategory.SALAM),
+        Triple("آقا کا میلاد آیا", "Aaqa Ka Milad Aaya", NaatCategory.NAAT),
+        Triple("آمدِ مصطفیٰ مرحبا", "Aamad-e-Mustafa Marhaba", NaatCategory.NAAT),
+        Triple("میرے نبی پیارے نبی", "Mere Nabi Pyare Nabi", NaatCategory.NAAT),
+        Triple("نور والا آیا ہے", "Noor Wala Aaya Hai", NaatCategory.NAAT),
+        Triple("یا محمد نورِ مجسم", "Ya Muhammad Noor-e-Mujassam", NaatCategory.NAAT),
+        Triple("کرم کے بادل چھائے", "Karam Ke Badal Chhaye", NaatCategory.MANQABAT),
+        Triple("مدینے کی گلیوں میں", "Madine Ki Galiyon Mein", NaatCategory.NAAT),
+        Triple("درِ نبی پر پڑا رہنے دو", "Dar-e-Nabi Par Para Rehne Do", NaatCategory.NAAT),
+        Triple("میٹھا میٹھا ہے میرے محمد کا نام", "Meetha Meetha Hai Muhammad Ka Naam", NaatCategory.NAAT),
+        Triple("سرکار یہ نامِ محمد", "Sarkar Yeh Naam-e-Muhammad", NaatCategory.NAAT),
+        Triple("خدا کا ذکر کرے", "Khuda Ka Zikr Kare", NaatCategory.HAMD),
+        Triple("اللہ کے نبی سے محبت", "Allah Ke Nabi Se Mohabbat", NaatCategory.NAAT),
+        Triple("آقا کی آمد مرحبا", "Aaqa Ki Aamad Marhaba", NaatCategory.NAAT),
+        Triple("چلو دیوانو مدینے بلایا گیا ہے", "Chalo Deewano Madine Bulaya Gaya Hai", NaatCategory.NAAT),
+        Triple("کعبے پہ پڑی جب پہلی نظر", "Kaabe Pe Pari Jab Pehli Nazar", NaatCategory.NAAT),
+        Triple("نبی کا ذکر ہو", "Nabi Ka Zikr Ho", NaatCategory.NAAT),
+        Triple("یا رسول اللہ تیرے در کی فضاؤں کو سلام", "Ya Rasool Allah Tere Dar Ki Fizaon Ko Salam", NaatCategory.SALAM)
+    ).mapIndexed { index, entry ->
+        NaatItem(
+            id = "catalogue_naat_${index + 9}",
+            titleUrdu = entry.first,
+            titleEnglish = entry.second,
+            artistUrdu = "مختلف نعت خواں",
+            artistEnglish = "Various reciters",
+            category = entry.third,
+            duration = "—",
+            audioUrl = "",
+            lyricsUrdu = emptyList(),
+            descriptionUrdu = "فہرست میں شامل؛ مستند آڈیو ریکارڈنگ ابھی دستیاب نہیں",
+            isFeatured = false
+        )
+    }
 
     fun getNaatsByCategory(category: NaatCategory): List<NaatItem> {
         return if (category == NaatCategory.ALL) ALL_NAATS else ALL_NAATS.filter { it.category == category }
