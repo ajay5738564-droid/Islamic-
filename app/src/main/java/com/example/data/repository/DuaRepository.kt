@@ -20,7 +20,8 @@ object DuaRepository {
         DuaCategory("health", "Health & Shifa", "शिफ़ा और बीमारी", "صحت اور شفا کی دعائیں", "healing", 3),
         DuaCategory("ramadan", "Ramadan & Fasting", "रमज़ान और रोज़ा", "رمضان اور روزے کی دعائیں", "brightness_3", 4),
         DuaCategory("hajj", "Hajj & Umrah", "हज और उमरा", "حج اور عمرہ کی دعائیں", "mosque", 4),
-        DuaCategory("daily", "Daily Essentials", "रोज़मर्रा की दुआएं", "روزمرہ کی اہم دعائیں", "schedule", 5)
+        DuaCategory("daily", "Daily Essentials", "रोज़मर्रा की दुआएं", "روزمرہ کی اہم دعائیں", "schedule", 5),
+        DuaCategory("poetry", "Dua & Munajat (Poetry)", "दुआ और मुनाजात", "دعا اور مناجات", "menu_book", 1)
     )
 
     val ALL_DUAS = listOf(
@@ -244,6 +245,21 @@ object DuaRepository {
             urduTranslation = "اے اللہ! تو بہت معاف کرنے والا ہے اور معافی کو پسند فرماتا ہے، پس مجھے معاف فرما دے۔",
             reference = "Jami' at-Tirmidhi (3513), Sunan Ibn Majah",
             recommendedCount = 100
+        ),
+        DuaItem(
+            id = "poetry_iqbal_1",
+            categoryId = "poetry",
+            titleEnglish = "Lab Pe Aati Hai Dua (Allama Iqbal)",
+            titleHindi = "लब पे आती है दुआ बन के तमन्ना मेरी",
+            titleUrdu = "لب پہ آتی ہے دعا بن کے تمنا میری",
+            arabicText = "لب پہ آتی ہے دعا بن کے تمنا میری\nزندگی شمع کی صورت ہو خدایا میری\nدور دنیا کا مرے دم سے اندھیرا ہو جائے\nہر جگہ میرے چمکنے سے اجالا ہو جائے\nہو مرے دم سے یونہی میرے وطن کی زینت\nجس طرح پھول سے ہوتی ہے چمن کی زینت\nزندگی ہو مری پروانے کی صورت یا رب\nعلم کی شمع سے ہو مجھ کو محبت یا رب\nہو مرا کام غریبوں کی حمایت کرنا\nدردمندوں سے، ضعیفوں سے محبت کرنا\nمرے اللہ! برائی سے بچانا مجھ کو\nنیک جو راہ ہو اس رہ پہ چلانا مجھ کو",
+            transliteration = "Lab pe aati hai dua ban ke tamanna meri; zindagi shamma ki soorat ho Khudaya meri. Door duniya ka mere dam se andhera ho jaaye; har jagah mere chamakne se ujala ho jaaye. Ho mere dam se yunhi mere watan ki zeenat; jis tarah phool se hoti hai chaman ki zeenat. Zindagi ho meri parwane ki soorat ya Rab; ilm ki shamma se ho mujh ko mohabbat ya Rab. Ho mera kaam ghareebon ki himayat karna; dard-mandon se, zaeefon se mohabbat karna. Mere Allah, burai se bachana mujh ko; nek jo raah ho us rah pe chalana mujh ko.",
+            englishTranslation = "A prayer that my wish may rise to my lips: O God, let my life shine like a candle. May darkness be lifted through my efforts and light spread wherever I shine. May I add beauty to my homeland as flowers beautify a garden. Let my life be devoted to goodness and let me love the light of knowledge. Let me support the poor and care for the suffering and the weak. O Allah, protect me from wrongdoing and guide me along the good path.",
+            hindiTranslation = "मेरे होंठों पर मेरी तमन्ना बनकर यह दुआ आती है: ऐ खुदा, मेरी ज़िंदगी शमा की तरह रोशन हो। मेरी कोशिशों से दुनिया का अंधेरा दूर हो और हर जगह उजाला फैले। मैं अपने वतन की उसी तरह ज़ीनत बनूँ जैसे फूल चमन की शोभा बढ़ाते हैं। मेरी ज़िंदगी भलाई के लिए समर्पित हो और मुझे इल्म की रोशनी से मोहब्बत हो। मैं गरीबों का सहारा बनूँ और दुखी व कमज़ोर लोगों से मोहब्बत करूँ। ऐ अल्लाह, मुझे बुराई से बचा और नेक रास्ते पर चला।",
+            urduTranslation = "لب پہ آتی ہے دعا بن کے تمنا میری، زندگی شمع کی صورت ہو خدایا میری۔ دور دنیا کا مرے دم سے اندھیرا ہو جائے، ہر جگہ میرے چمکنے سے اجالا ہو جائے۔ ہو مرے دم سے یونہی میرے وطن کی زینت، جس طرح پھول سے ہوتی ہے چمن کی زینت۔ زندگی ہو مری پروانے کی صورت یا رب، علم کی شمع سے ہو مجھ کو محبت یا رب۔ ہو مرا کام غریبوں کی حمایت کرنا، درد مندوں سے، ضعیفوں سے محبت کرنا۔ مرے اللہ برائی سے بچانا مجھ کو، نیک جو راہ ہو اس رہ پہ چلانا مجھ کو۔",
+            reference = "Poem by Allama Muhammad Iqbal (not a Qur'anic verse or Hadith)",
+            benefit = "A children's prayer expressing hope for knowledge, kindness, service, and a life guided by goodness.",
+            recommendedCount = 1
         )
     )
 }
