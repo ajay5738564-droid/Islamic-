@@ -248,7 +248,7 @@ object NaatRepository {
             descriptionUrdu = "سفرِ مدینہ اور گنبدِ خضریٰ کے شوق میں لکھی گئی مشہور نعت",
             isFeatured = false
         )
-    ) + ADDITIONAL_NAATS + ADDITIONAL_NAATS
+    ) + ADDITIONAL_NAATS
 
 
 
