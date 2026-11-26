@@ -702,6 +702,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         receiver.onReceive(context, intent)
     }
 
+    private var lastScheduledAlarmSignature: String? = null
+
     private fun syncPrayerAlarms() {
         val schedule = _dailyPrayerSchedule.value ?: return
         val enabledPrayers = mutableSetOf<PrayerName>()
@@ -711,6 +713,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (notifyMaghrib.value) enabledPrayers.add(PrayerName.MAGHRIB)
         if (notifyIsha.value) enabledPrayers.add(PrayerName.ISHA)
 
+        // The countdown refreshes every second; avoid resetting exact alarms every second.
+        // Include the local date so the next day's alarms are scheduled after midnight.
+        val alarmSignature = listOf(
+            schedule.dateGregorian,
+            cityName.value,
+            azanVoice.value,
+            enabledPrayers.map { it.name }.sorted().joinToString(","),
+            schedule.prayers.joinToString("|") { "${it.name.name}:${it.timeFormatted}" }
+        ).joinToString("::")
+        if (alarmSignature == lastScheduledAlarmSignature) return
+
         AzanAlarmScheduler.schedulePrayerAlarms(
             context = getApplication(),
             schedule = schedule,
@@ -719,6 +732,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             // Use the requested Madinah adhan for scheduled prayer alarms.
             azanVoice = "Madinah"
         )
+        lastScheduledAlarmSignature = alarmSignature
     }
 
     // Knowledge Section Logic
