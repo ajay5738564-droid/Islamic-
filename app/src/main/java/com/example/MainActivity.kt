@@ -127,7 +127,7 @@ fun DeenovaApp(
         bottomBar = {
             Column {
                 // Keep the banner slot visible on every screen; Unity serves ads only when online inventory is available.
-                UnityBannerAd()
+                UnityBannerAd(reloadKey = currentTab.ordinal)
                 DeenovaBottomNavigation(
                     selectedTab = currentTab,
                     currentLanguage = currentLanguage,
