@@ -8,6 +8,8 @@ import com.example.data.model.SurahDetail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.json.JSONArray
+import java.util.Locale
 import java.net.HttpURLConnection
 import java.net.URL
 
