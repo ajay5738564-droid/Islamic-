@@ -1,11 +1,8 @@
 # APK Build Notes
 
-This commit triggers the Android debug APK workflow.
+This commit builds the online-only Deenova Android app.
 
-- Unity Ads SDK dependency removed from the app module.
-- Unity Ads initialization and interstitial display removed from MainActivity.
-- Unity banner component removed from the Home screen.
-- Unity Ads implementation and configuration source files removed.
-- Unity Ads version-catalog entries removed.
-
-The app is intended to build without Unity Ads integration.
+- Firebase SDK dependencies, Firebase App Check, and the Google Services Gradle plugin are removed.
+- The app requires a validated internet connection before its main features can be used.
+- Unity Ads integration remains in the app; ad delivery still depends on valid Unity Dashboard configuration and available inventory.
+- Build the debug APK with: `gradle :app:assembleDebug`.
