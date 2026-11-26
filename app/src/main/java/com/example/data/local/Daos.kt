@@ -41,6 +41,9 @@ interface OfflineAyahDao {
     @Query("SELECT * FROM offline_ayahs WHERE surahNumber = :surahNumber ORDER BY numberInSurah ASC")
     suspend fun getAyahsForSurah(surahNumber: Int): List<OfflineAyahEntity>
 
+    @Query("SELECT * FROM offline_ayahs WHERE juz = :juzNumber ORDER BY numberGlobal ASC")
+    suspend fun getAyahsForJuz(juzNumber: Int): List<OfflineAyahEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAyahs(ayahs: List<OfflineAyahEntity>)
 }
