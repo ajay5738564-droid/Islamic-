@@ -46,7 +46,7 @@ class AzanNotificationReceiver : BroadcastReceiver() {
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME) ?: "نماز"
         val prayerTime = intent.getStringExtra(EXTRA_PRAYER_TIME) ?: ""
         val cityName = intent.getStringExtra(EXTRA_CITY_NAME) ?: ""
-        val azanVoice = intent.getStringExtra(EXTRA_AZAN_VOICE) ?: "Makkah"
+        val azanVoice = intent.getStringExtra(EXTRA_AZAN_VOICE) ?: "Madinah"
         val isFajr = prayerKey.equals("FAJR", ignoreCase = true)
 
         // 1. Play the Azan Audio directly with full alarm volume
