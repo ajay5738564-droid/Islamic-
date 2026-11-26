@@ -8,6 +8,7 @@ import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
 import com.unity3d.ads.UnityAds
 import com.unity3d.ads.UnityAdsShowOptions
+import com.unity3d.services.banners.BannerView
 
 /**
  * Direct Unity Ads integration for the Android app.
@@ -24,6 +25,7 @@ object UnityAdsManager {
     private const val TEST_MODE = false
 
     @Volatile private var initialized = false
+    private val pendingBannerLoads = mutableListOf<BannerView>()
     @Volatile private var interstitialReady = false
     @Volatile private var rewardedReady = false
     @Volatile private var interstitialLoading = false
@@ -35,6 +37,7 @@ object UnityAdsManager {
     fun initialize(context: Context) {
         if (initialized || UnityAds.isInitialized) {
             initialized = true
+            loadPendingBanners()
             preloadInterstitial()
             preloadRewarded()
             return
@@ -48,6 +51,7 @@ object UnityAdsManager {
                 override fun onInitializationComplete() {
                     initialized = true
                     Log.i(TAG, "Unity Ads initialized")
+                    loadPendingBanners()
                     preloadInterstitial()
                     preloadRewarded()
                 }
@@ -61,6 +65,31 @@ object UnityAdsManager {
                 }
             }
         )
+    }
+
+    @Synchronized
+    fun loadBannerWhenReady(banner: BannerView) {
+        if (initialized || UnityAds.isInitialized) {
+            initialized = true
+            banner.load()
+        } else {
+            if (!pendingBannerLoads.contains(banner)) pendingBannerLoads.add(banner)
+            Log.i(TAG, "Banner queued until Unity Ads initialization completes")
+        }
+    }
+
+    @Synchronized
+    private fun loadPendingBanners() {
+        val queued = pendingBannerLoads.toList()
+        pendingBannerLoads.clear()
+        queued.forEach { banner ->
+            try {
+                banner.load()
+                Log.i(TAG, "Queued banner load requested")
+            } catch (error: Exception) {
+                Log.e(TAG, "Queued banner load failed", error)
+            }
+        }
     }
 
     @Synchronized
