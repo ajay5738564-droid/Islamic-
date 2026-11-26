@@ -284,6 +284,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var countdownTimerJob: Job? = null
 
     init {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            // Download Quran Juz text in the background once internet is available;
+            // saved ayahs remain readable from Room when the device is offline later.
+            QuranRepository.cacheAllJuzForOffline(database)
+        }
         updatePrayerSchedule()
         startPeriodicScheduleUpdates()
         sensorManager.startListening()
@@ -313,12 +318,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectJuz(juzNumber: Int, justUnlocked: Boolean = false) {
-        if (!justUnlocked && !isJuzUnlocked(juzNumber)) return
+        if (juzNumber !in 1..30) return
         _selectedSurah.value = null
         _selectedJuz.value = juzNumber
         viewModelScope.launch {
             _isSurahLoading.value = true
-            _currentSurahAyahs.value = QuranRepository.getJuzAyahs(juzNumber)
+            _currentSurahAyahs.value = QuranRepository.getJuzAyahs(database, juzNumber)
             _isSurahLoading.value = false
         }
     }
