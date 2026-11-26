@@ -358,7 +358,8 @@ object QuranRepository {
             for (juz in 1..30) {
                 try {
                     if (database.offlineAyahDao().getAyahsForJuz(juz).isEmpty()) {
-                        getJuzAyahs(database, juz)
+                        val downloaded = getJuzAyahs(database, juz)
+                        if (downloaded.isEmpty()) break
                     }
                 } catch (e: Exception) {
                     android.util.Log.w("QuranRepository", "Offline cache paused at Juz $juz", e)
