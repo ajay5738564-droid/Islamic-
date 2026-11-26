@@ -31,13 +31,19 @@ fun UnityBannerAd(reloadKey: Int = 0) {
     }
 
     DisposableEffect(banner, lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                UnityAdsManager.loadBannerWhenReady(banner)
+        // Load only after the native banner view has been attached to the Android view tree.
+        val requestLoad = {
+            banner.post {
+                if (banner.isAttachedToWindow) {
+                    UnityAdsManager.loadBannerWhenReady(banner)
+                }
             }
         }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) requestLoad()
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
-        UnityAdsManager.loadBannerWhenReady(banner)
+        requestLoad()
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             banner.destroy()
@@ -45,7 +51,12 @@ fun UnityBannerAd(reloadKey: Int = 0) {
     }
 
     AndroidView(
-        factory = { banner },
+        factory = { view ->
+            view.post {
+                if (view.isAttachedToWindow) UnityAdsManager.loadBannerWhenReady(view)
+            }
+            view
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
