@@ -560,6 +560,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             resumeNaat()
             return
         }
+        // Catalogue-only entries intentionally have no audio until a verified recording is supplied.
+        if (item.audioUrl.isBlank()) return
 
         // Stop Quran audio if playing to prevent collision
         stopAudio()
@@ -714,7 +716,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             schedule = schedule,
             cityName = cityName.value,
             enabledPrayers = enabledPrayers,
-            azanVoice = azanVoice.value
+            // Use the requested Madinah adhan for scheduled prayer alarms.
+            azanVoice = "Madinah"
         )
     }
 
