@@ -14,19 +14,30 @@ android {
     applicationId = "com.aistudio.deenova.appqvr"
     minSdk = 24
     targetSdk = 36
-    versionCode = 1
-    versionName = "1.0"
+    versionCode = 2
+    versionName = "1.0.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   signingConfigs {
-    create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+    // A release can only be signed when the owner's existing upload key is supplied securely.
+    // Never generate a replacement key for an app that has already been published.
+    val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
+    val releaseStorePassword = System.getenv("STORE_PASSWORD")
+    val releaseKeyPassword = System.getenv("KEY_PASSWORD")
+    val releaseKeystoreFile = releaseKeystorePath?.let { file(it) }
+    val hasReleaseSigning = releaseKeystoreFile?.isFile == true &&
+      !releaseStorePassword.isNullOrBlank() &&
+      !releaseKeyPassword.isNullOrBlank()
+
+    if (hasReleaseSigning) {
+      create("release") {
+        storeFile = requireNotNull(releaseKeystoreFile)
+        storePassword = requireNotNull(releaseStorePassword)
+        keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
+        keyPassword = requireNotNull(releaseKeyPassword)
+      }
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
@@ -41,7 +52,13 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
+      if (System.getenv("KEYSTORE_PATH")?.let { file(it).isFile } == true &&
+          !System.getenv("STORE_PASSWORD").isNullOrBlank() &&
+          !System.getenv("KEY_PASSWORD").isNullOrBlank()) {
+        signingConfig = signingConfigs.getByName("release")
+      } else {
+        logger.warn("Release APK will be unsigned: configure the existing upload keystore and GitHub secrets before distribution.")
+      }
     }
     debug { signingConfig = signingConfigs.getByName("debugConfig") }
   }
