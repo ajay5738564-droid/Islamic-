@@ -1,18 +1,18 @@
-name: Build Debug APK
+name: Build and Test Debug APK (Testing Only)
 
 on:
   push:
     branches:
       - main
+      - "audit/**"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,25 +20,8 @@ jobs:
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Verify Java environment
-        run: |
-          echo "Checking java version:"
-          java -version
-          echo "JAVA_HOME is: $JAVA_HOME"
-          JAVA_MAJOR_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-          echo "Detected Java major version: $JAVA_MAJOR_VER"
-          if [ -z "$JAVA_MAJOR_VER" ]; then
-            echo "Error: Unable to detect active Java major version."
-            exit 1
-          fi
-          if [ "$JAVA_MAJOR_VER" -lt 17 ]; then
-            echo "Error: Active Java major version ($JAVA_MAJOR_VER) is lower than 17."
-            exit 1
-          fi
-          echo "Java environment verified (version $JAVA_MAJOR_VER >= 17)."
+          distribution: temurin
+          java-version: "17"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -47,75 +30,30 @@ jobs:
 
       - name: Create temporary debug keystore
         run: |
-          if [ -f "./debug.keystore" ]; then
-            echo "Existing debug.keystore found."
-          else
-            echo "debug.keystore missing. Generating temporary debug keystore..."
-            keytool -genkey -v \
-              -keystore ./debug.keystore \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
-          fi
-          if [ ! -f "./debug.keystore" ]; then
-            echo "Error: Failed to create ./debug.keystore."
-            exit 1
-          fi
-          echo "Temporary debug keystore verified."
+          keytool -genkey -v \
+            -keystore ./debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon
+      - name: Run unit tests and build debug APK
+        run: gradle :app:testDebugUnitTest :app:assembleDebug --stacktrace --no-daemon
 
       - name: Verify debug APK
         run: |
-          EXPECTED_APK="app/build/outputs/apk/debug/app-debug.apk"
-          if [ ! -f "$EXPECTED_APK" ]; then
-            echo "Error: Expected debug APK not found at $EXPECTED_APK."
-            echo "Discovered APK files in app/build/outputs/apk:"
-            if [ -d "app/build/outputs/apk" ]; then
-              find app/build/outputs/apk -name "*.apk"
-            else
-              echo "Directory app/build/outputs/apk does not exist."
-            fi
-            exit 1
-          fi
-          if [ ! -s "$EXPECTED_APK" ]; then
-            echo "Error: Found APK file at $EXPECTED_APK but it is empty."
-            exit 1
-          fi
-          case "$EXPECTED_APK" in
-            *.apk) ;;
-            *) echo "Error: $EXPECTED_APK does not have .apk extension."; exit 1 ;;
-          esac
-          echo "Successfully verified expected debug APK at $EXPECTED_APK."
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          echo "Debug APK verified: $APK"
+          sha256sum "$APK"
 
-      - name: Upload debug APK artifact
+      - name: Upload debug APK for device testing
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: islamic-app-debug-v2-testing-only
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-
-      - name: Publish APK to GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
-        with:
-          tag_name: latest
-          name: "Deenova Islamic App (Debug APK)"
-          body: |
-            ### 📱 Deenova Islamic App - Latest Build
-            - ✅ 5 Time Namaz Tracker & Complete Prayer Guide (۵ وقت کی نماز اور رکعتیں)
-            - 📖 Quran with Urdu Translations & Tafseer
-            - 🕌 Accurate Prayer Times & Live Qibla Compass
-            - 📿 Digital Tasbeeh, Hisn al-Muslim Duas & Sahih Hadiths
-            
-            **Download the attached APK below to install on your Android device.**
-          files: app/build/outputs/apk/debug/app-debug.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+          retention-days: 14
