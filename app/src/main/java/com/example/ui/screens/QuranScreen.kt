@@ -327,7 +327,6 @@ fun QuranScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items((1..30).toList(), key = { it }) { juzNum ->
-                        val startingSurah = QuranRepository.ALL_114_SURAHS.find { it.startingJuz == juzNum } ?: QuranRepository.ALL_114_SURAHS.first()
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -377,7 +376,7 @@ fun QuranScreen(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = "Starts with Surah ${startingSurah.nameEnglish}",
+                                            text = "Quran Para $juzNum",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
