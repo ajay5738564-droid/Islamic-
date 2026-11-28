@@ -284,11 +284,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var countdownTimerJob: Job? = null
 
     init {
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            // Download Quran Juz text in the background once internet is available;
-            // saved ayahs remain readable from Room when the device is offline later.
-            QuranRepository.cacheAllJuzForOffline(database)
-        }
         updatePrayerSchedule()
         startPeriodicScheduleUpdates()
         sensorManager.startListening()
