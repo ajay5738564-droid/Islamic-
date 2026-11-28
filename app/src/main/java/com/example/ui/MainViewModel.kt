@@ -555,51 +555,74 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             resumeNaat()
             return
         }
-        // Catalogue-only entries intentionally have no audio until a verified recording is supplied.
-        if (item.audioUrl.isBlank()) return
 
-        // Stop Quran audio if playing to prevent collision
+        // Never pretend a catalogue-only entry is playable.
+        if (item.audioUrl.isBlank()) {
+            stopNaat()
+            return
+        }
+
         stopAudio()
+        stopNaat()
 
         try {
-            naatMediaPlayer?.release()
-            naatProgressJob?.cancel()
-            _naatProgressSeconds.value = 0
             _currentPlayingNaat.value = item
             _naatPlaybackState.value = AudioPlaybackState.BUFFERING
 
-            naatMediaPlayer = MediaPlayer().apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                )
-                setDataSource(item.audioUrl)
+            val player = MediaPlayer()
+            naatMediaPlayer = player
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+            player.setDataSource(item.audioUrl)
 
-                setOnPreparedListener { mp ->
-                    mp.start()
+            player.setOnPreparedListener { preparedPlayer ->
+                if (naatMediaPlayer === preparedPlayer) {
+                    preparedPlayer.start()
                     _naatPlaybackState.value = AudioPlaybackState.PLAYING
-                    _naatTotalSeconds.value = (mp.duration / 1000).coerceAtLeast(1)
+                    _naatTotalSeconds.value = (preparedPlayer.duration / 1000).coerceAtLeast(1)
                     startNaatProgressTracker()
                 }
-
-                setOnCompletionListener {
-                    _naatPlaybackState.value = AudioPlaybackState.IDLE
-                    _naatProgressSeconds.value = 0
-                    naatProgressJob?.cancel()
-                }
-
-                setOnErrorListener { _, _, _ ->
-                    _naatPlaybackState.value = AudioPlaybackState.IDLE
-                    naatProgressJob?.cancel()
-                    true
-                }
-
-                prepareAsync()
             }
+
+            player.setOnCompletionListener { completedPlayer ->
+                if (naatMediaPlayer === completedPlayer) {
+                    naatProgressJob?.cancel()
+                    _naatProgressSeconds.value = 0
+                    _naatPlaybackState.value = AudioPlaybackState.IDLE
+                    _currentPlayingNaat.value = null
+                    completedPlayer.release()
+                    naatMediaPlayer = null
+                }
+            }
+
+            player.setOnErrorListener { failedPlayer, _, _ ->
+                if (naatMediaPlayer === failedPlayer) {
+                    naatProgressJob?.cancel()
+                    _naatProgressSeconds.value = 0
+                    _naatPlaybackState.value = AudioPlaybackState.IDLE
+                    _currentPlayingNaat.value = null
+                    failedPlayer.reset()
+                    failedPlayer.release()
+                    naatMediaPlayer = null
+                }
+                true
+            }
+
+            player.prepareAsync()
         } catch (e: Exception) {
+            naatProgressJob?.cancel()
+            naatMediaPlayer?.runCatching {
+                reset()
+                release()
+            }
+            naatMediaPlayer = null
+            _naatProgressSeconds.value = 0
             _naatPlaybackState.value = AudioPlaybackState.IDLE
+            _currentPlayingNaat.value = null
         }
     }
 
