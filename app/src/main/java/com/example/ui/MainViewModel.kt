@@ -213,8 +213,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun isJuzUnlocked(juzNumber: Int): Boolean = juzNumber == 1 || juzNumber in unlockedQuranJuz.value
 
-    fun unlockJuz(juzNumber: Int) {
-        viewModelScope.launch { preferences.unlockQuranJuz(juzNumber) }
+    fun unlockJuz(juzNumber: Int, onUnlocked: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            preferences.unlockQuranJuz(juzNumber)
+            onUnlocked?.invoke()
+        }
     }
 
     fun claimAdReward(points: Int = 100) {
