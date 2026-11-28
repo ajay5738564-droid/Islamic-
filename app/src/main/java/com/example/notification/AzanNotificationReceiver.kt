@@ -48,9 +48,9 @@ class AzanNotificationReceiver : BroadcastReceiver() {
                 return
             }
             ACTION_STOP_AZAN -> {
-            AzanPlayerManager.stopAzan()
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                AzanPlayerManager.stopAzan()
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(NOTIFICATION_ID)
                 return
             }
