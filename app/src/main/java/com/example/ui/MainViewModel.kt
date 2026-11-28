@@ -724,8 +724,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             schedule = schedule,
             cityName = cityName.value,
             enabledPrayers = enabledPrayers,
-            // Use the requested Madinah adhan for scheduled prayer alarms.
-            azanVoice = "Madinah"
+            // Respect the user's selected adhan voice for scheduled prayer alarms.
+            azanVoice = azanVoice.value
         )
         lastScheduledAlarmSignature = alarmSignature
     }
