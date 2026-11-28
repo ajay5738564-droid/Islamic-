@@ -46,6 +46,7 @@ fun QuranScreen(
     val unlockedJuz by viewModel.unlockedQuranJuz.collectAsState()
     val context = LocalContext.current
     var showJuzUnlockDialog by remember { mutableStateOf<Int?>(null) }
+    var isRewardedAdUnavailable by remember { mutableStateOf(false) }
     val ayahs by viewModel.currentSurahAyahs.collectAsState()
     val isLoading by viewModel.isSurahLoading.collectAsState()
     val searchQuery by viewModel.quranSearchQuery.collectAsState()
@@ -405,20 +406,35 @@ fun QuranScreen(
             onDismissRequest = { showJuzUnlockDialog = null },
             icon = { Icon(Icons.Default.Lock, contentDescription = null, tint = GoldAccent) },
             title = { Text("Unlock Para $juzNumber") },
-            text = { Text("Watch one short rewarded video to unlock this complete para permanently. You will not need to watch again for this para.") },
+            text = {
+                Text(
+                    if (isRewardedAdUnavailable) {
+                        "A rewarded ad is not available right now. Please check your internet connection and try again in a moment. The para is still locked."
+                    } else {
+                        "Watch one rewarded video to unlock this complete para permanently. You will not need to watch again for this para."
+                    }
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showJuzUnlockDialog = null
                         val activity = context as? Activity
-                        if (activity != null) {
+                        if (activity == null) {
+                            isRewardedAdUnavailable = true
+                        } else {
+                            isRewardedAdUnavailable = false
+                            showJuzUnlockDialog = null
                             UnityAdsManager.showRewarded(
                                 activity = activity,
                                 onRewardEarned = {
-                                    viewModel.unlockJuz(juzNumber)
-                                    viewModel.selectJuz(juzNumber, justUnlocked = true)
+                                    viewModel.unlockJuz(juzNumber) {
+                                        viewModel.selectJuz(juzNumber, justUnlocked = true)
+                                    }
                                 },
-                                onUnavailable = { }
+                                onUnavailable = {
+                                    isRewardedAdUnavailable = true
+                                    showJuzUnlockDialog = juzNumber
+                                }
                             )
                         }
                     }
