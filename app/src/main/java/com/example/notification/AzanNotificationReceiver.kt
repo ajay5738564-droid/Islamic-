@@ -10,9 +10,18 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.MainActivity
 import com.example.R
+import com.example.data.model.PrayerName
+import com.example.data.repository.PrayerCalculationRepository
+import com.example.data.repository.UserPreferencesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class AzanNotificationReceiver : BroadcastReceiver() {
 
@@ -30,16 +39,26 @@ class AzanNotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            return
-        }
-
-        if (intent.action == ACTION_STOP_AZAN) {
+        when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_DATE_CHANGED -> {
+                reschedulePrayerAlarms(context)
+                return
+            }
+            ACTION_STOP_AZAN -> {
             AzanPlayerManager.stopAzan()
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.cancel(NOTIFICATION_ID)
-            return
+                notificationManager.cancel(NOTIFICATION_ID)
+                return
+            }
+            AzanAlarmScheduler.ACTION_AZAN_ALARM -> {
+                // Keep the next prayer alarms queued even if the app UI is not running.
+                reschedulePrayerAlarms(context)
+            }
+            else -> return
         }
 
         val prayerKey = intent.getStringExtra(EXTRA_PRAYER_KEY) ?: "PRAYER"
@@ -59,6 +78,43 @@ class AzanNotificationReceiver : BroadcastReceiver() {
 
         // 2. Show the Rich Notification with Azan Control buttons
         showAzanNotification(context, prayerName, prayerTime, cityName, azanVoice)
+    }
+
+    private fun reschedulePrayerAlarms(context: Context) {
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val preferences = UserPreferencesRepository(context.applicationContext)
+                val enabledPrayers = mutableSetOf<PrayerName>()
+                if (preferences.notifyFajrFlow.first()) enabledPrayers.add(PrayerName.FAJR)
+                if (preferences.notifyDhuhrFlow.first()) enabledPrayers.add(PrayerName.DHUHR)
+                if (preferences.notifyAsrFlow.first()) enabledPrayers.add(PrayerName.ASR)
+                if (preferences.notifyMaghribFlow.first()) enabledPrayers.add(PrayerName.MAGHRIB)
+                if (preferences.notifyIshaFlow.first()) enabledPrayers.add(PrayerName.ISHA)
+
+                val cityName = preferences.selectedCityFlow.first()
+                val schedule = PrayerCalculationRepository.getDailySchedule(
+                    date = Calendar.getInstance(),
+                    latitude = preferences.latitudeFlow.first(),
+                    longitude = preferences.longitudeFlow.first(),
+                    timeZoneOffsetHours = preferences.tzOffsetFlow.first(),
+                    cityName = cityName,
+                    method = preferences.calculationMethodFlow.first(),
+                    asrMadhab = preferences.asrMadhabFlow.first()
+                )
+                AzanAlarmScheduler.schedulePrayerAlarms(
+                    context = context.applicationContext,
+                    schedule = schedule,
+                    cityName = cityName,
+                    enabledPrayers = enabledPrayers,
+                    azanVoice = preferences.azanVoiceFlow.first()
+                )
+            } catch (error: Exception) {
+                Log.e("AzanNotificationReceiver", "Could not reschedule prayer alarms", error)
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     private fun showAzanNotification(
